@@ -1,22 +1,21 @@
-import { cookies } from "next/headers";
 import {
-  SESSION_COOKIE,
-  approvalKeyboard,
+  actorFromTelegram,
   authConfigured,
   authDateFresh,
-  issueSession,
   sendLog,
-  sessionTtlSeconds,
   verifyTelegramPayload,
-  type Actor,
   type TelegramPayload,
 } from "@/lib/server/auth";
-import { isAllowed, rememberPending, storeConfigured } from "@/lib/server/store";
+import { finishLogin } from "@/lib/server/login";
 
 /**
- * Telegram Login Widget'inin dondurdugu veriyi dogrular ve oturum cerezini
- * yazar. Dogrulama bot token'iyla yapilan bir HMAC oldugu icin tarayicida
+ * Telegram Login Widget'inin dondurdugu veriyi dogrular ve oturumu acar.
+ * Dogrulama bot token'iyla yapilan bir HMAC oldugu icin tarayicida
  * yapilamaz - bu ucun varlik sebebi bu.
+ *
+ * Widget yalniz BotFather'da /setdomain ile kayitli alan adinda calisir.
+ * Kayitsiz adreslerde (preview deploy'lari, localhost) /api/auth/link
+ * uzerindeki bot baglantisi yolu kullanilir.
  */
 export async function POST(request: Request) {
   if (!authConfigured()) {
@@ -50,46 +49,5 @@ export async function POST(request: Request) {
     );
   }
 
-  const actor: Actor = {
-    id: String(data.id),
-    username: data.username || "",
-    name: [data.first_name, data.last_name].filter(Boolean).join(" ").trim(),
-  };
-
-  if (!(await isAllowed(actor.id))) {
-    // Kanaldaki mesajin altina onay tuslari konur: yonetici tek dokunusla
-    // yetkilendirir, kullanici sayfayi yenileyip girer. Ad/kullanici adi
-    // callback verisine sigmadigi icin ayrica saklaniyor.
-    await rememberPending({ id: actor.id, name: actor.name, username: actor.username });
-    await sendLog({
-      action: "login_denied",
-      actor,
-      request,
-      detail: storeConfigured()
-        ? undefined
-        : { "izin icin ekle": `ALLOWED_USER_IDS += ${actor.id}` },
-      replyMarkup: storeConfigured() ? approvalKeyboard(actor.id) : undefined,
-    });
-    // userId geri veriliyor: kullanici kendi id'sini gorsun.
-    return Response.json({ error: "Bu hesap yetkili degil.", userId: actor.id }, { status: 403 });
-  }
-
-  const ttl = sessionTtlSeconds();
-  const store = await cookies();
-  store.set(SESSION_COOKIE, await issueSession(data), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: ttl,
-  });
-
-  await sendLog({
-    action: "login",
-    actor,
-    request,
-    detail: { "oturum suresi": `${ttl / 3600} saat` },
-  });
-
-  return Response.json({ user: { ...actor, exp: Math.floor(Date.now() / 1000) + ttl } });
+  return finishLogin(request, actorFromTelegram(data), "widget");
 }

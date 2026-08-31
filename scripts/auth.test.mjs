@@ -94,7 +94,7 @@ delete process.env.TG_ADMIN_IDS;
 
 let token = "";
 {
-  token = await issueSession({ id: 888, first_name: "Ada", last_name: "L", username: "ada" });
+  token = await issueSession({ id: "888", name: "Ada L", username: "ada" });
   const session = await readSession(token);
   check("oturum okundu", session?.sub === "888" && session?.nm === "Ada L", JSON.stringify(session));
 
@@ -115,7 +115,7 @@ let token = "";
 
   // Suresi dolmus oturum.
   process.env.SESSION_TTL_HOURS = "-1";
-  const expired = await issueSession({ id: 888, first_name: "Ada" });
+  const expired = await issueSession({ id: "888", name: "Ada", username: "" });
   check("suresi dolmus oturum reddedildi", (await readSession(expired)) === null);
   process.env.SESSION_TTL_HOURS = "1";
 }

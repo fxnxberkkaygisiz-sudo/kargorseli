@@ -69,6 +69,63 @@ export async function loginWithTelegram(data: TelegramAuthData): Promise<LoginRe
   }
 }
 
+/* ------------------------------------------------- bot ile giris ------ */
+
+export interface LinkStart {
+  nonce: string;
+  /** t.me baglantisi - acildiginda Telegram uygulamasi devreye girer. */
+  url: string;
+}
+
+/**
+ * Widget yerine bot uzerinden giris. Tek kullanimlik bir anahtar alinir,
+ * kullanici baglantiyi Telegram'da acip Baslat'a basar, sonra claimLink
+ * yoklamasi oturumu getirir.
+ *
+ * Bu yol BotFather'daki alan adi kaydina bagli degil: widget'in
+ * "Bot domain invalid" dedigi her yerde (preview adresleri, localhost)
+ * calisir.
+ */
+export async function startLinkLogin(): Promise<{ ok: boolean; data?: LinkStart; error?: string }> {
+  try {
+    const res = await fetch(api("/auth/link/start"), { method: "POST" });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, error: json?.error || `HTTP ${res.status}` };
+    return { ok: true, data: json };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Baglanti hatasi";
+    return { ok: false, error: `Sunucuya ulasilamadi - ${message}` };
+  }
+}
+
+export type ClaimState =
+  | { state: "pending" }
+  | { state: "ok"; user: SessionUser }
+  | { state: "denied"; error: string; userId?: string }
+  | { state: "expired"; error: string };
+
+/** Anahtar bota baglandi mi? Baglandiysa oturumu acar. */
+export async function claimLink(nonce: string): Promise<ClaimState> {
+  try {
+    const res = await fetch(api("/auth/link/claim"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nonce }),
+    });
+    if (res.status === 202) return { state: "pending" };
+
+    const json = await res.json().catch(() => ({}));
+    if (res.ok) return { state: "ok", user: json.user };
+    if (res.status === 410) {
+      return { state: "expired", error: json?.error || "Bağlantının süresi doldu." };
+    }
+    return { state: "denied", error: json?.error || `HTTP ${res.status}`, userId: json?.userId };
+  } catch {
+    // Ag dalgalanmasi - yoklamaya devam.
+    return { state: "pending" };
+  }
+}
+
 /** Cerezdeki oturum hala gecerli mi? */
 export async function fetchSession(): Promise<SessionUser | null> {
   try {

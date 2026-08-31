@@ -45,6 +45,18 @@ export interface Actor {
   name: string;
 }
 
+/** Telegram'in verdigi ham nesneden ad/kullanici adini toparlar. */
+export const actorFromTelegram = (u: {
+  id: number | string;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+}): Actor => ({
+  id: String(u.id),
+  username: u.username || "",
+  name: [u.first_name, u.last_name].filter(Boolean).join(" ").trim(),
+});
+
 /* --------------------------------------------------------------- ayarlar -- */
 
 export const sessionTtlSeconds = () => Number(process.env.SESSION_TTL_HOURS || 12) * 3600;
@@ -122,12 +134,12 @@ export function authDateFresh(authDate: number | string): boolean {
 
 /* --------------------------------------------------------------- oturum ---- */
 
-export async function issueSession(user: TelegramPayload): Promise<string> {
+export async function issueSession(user: Actor): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const payload: SessionPayload = {
     sub: String(user.id),
     un: user.username || "",
-    nm: [user.first_name, user.last_name].filter(Boolean).join(" ").trim(),
+    nm: user.name || "",
     iat: now,
     exp: now + sessionTtlSeconds(),
   };

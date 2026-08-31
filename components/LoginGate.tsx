@@ -12,13 +12,15 @@ import {
 import {
   TG_BOT,
   authEnabled,
+  claimLink,
   fetchSession,
   loginWithTelegram,
   logout as endSession,
+  startLinkLogin,
   type SessionUser,
   type TelegramAuthData,
 } from "@/lib/auth";
-import { IconAlert, IconLayers } from "@/components/Icons";
+import { IconAlert, IconLayers, IconRefresh } from "@/components/Icons";
 
 interface SessionValue {
   user: SessionUser | null;
@@ -42,7 +44,8 @@ declare global {
  * global bir fonksiyon uzerinden geldigi icin window'a bagliyoruz.
  *
  * Widget yalniz BotFather'da `/setdomain` ile kayitli alan adinda calisir;
- * localhost'ta bos kalir.
+ * baska yerlerde "Bot domain invalid" der. Alttaki bot baglantisi yolu o
+ * durumda da calisiyor.
  */
 function TelegramButton({ onAuth }: { onAuth: (user: TelegramAuthData) => void }) {
   const host = useRef<HTMLDivElement>(null);
@@ -78,13 +81,17 @@ function TelegramButton({ onAuth }: { onAuth: (user: TelegramAuthData) => void }
     <>
       <div ref={host} className="min-h-[46px] flex items-center justify-center" />
       {failed && (
-        <p className="text-[11.5px] text-[var(--err)] text-center">
-          Telegram widget&apos;i yuklenemedi. Ag engeli olabilir.
+        <p className="text-[11.5px] text-[var(--text-3)] text-center leading-relaxed">
+          Widget yüklenemedi — aşağıdaki yoldan girebilirsiniz.
         </p>
       )}
     </>
   );
 }
+
+/** Yoklama araligi ve toplam bekleme suresi (sunucudaki anahtar 5 dk yasiyor). */
+const POLL_MS = 2000;
+const POLL_LIMIT = 150;
 
 export default function LoginGate({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -94,8 +101,21 @@ export default function LoginGate({ children }: { children: ReactNode }) {
   const [error, setError] = useState("");
   const [deniedId, setDeniedId] = useState("");
   const [busy, setBusy] = useState(false);
+  /** Bot baglantisi bekleniyor - kullanici Telegram'da Baslat'a basacak. */
+  const [waiting, setWaiting] = useState<{ url: string } | null>(null);
 
-  /* Sayfa acilisinda kayitli token hala gecerli mi? */
+  const polling = useRef<number | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (polling.current !== null) {
+      window.clearInterval(polling.current);
+      polling.current = null;
+    }
+  }, []);
+
+  useEffect(() => stopPolling, [stopPolling]);
+
+  /* Sayfa acilisinda cerezdeki oturum hala gecerli mi? */
   useEffect(() => {
     if (!authEnabled) return;
     let cancelled = false;
@@ -109,21 +129,82 @@ export default function LoginGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const handleAuth = useCallback(async (data: TelegramAuthData) => {
+  const enter = useCallback((found: SessionUser | null) => {
+    setUser(found);
+    setPhase("in");
+  }, []);
+
+  /* ------------------------------------------------------ widget yolu -- */
+  const handleAuth = useCallback(
+    async (data: TelegramAuthData) => {
+      stopPolling();
+      setWaiting(null);
+      setBusy(true);
+      setError("");
+      setDeniedId("");
+
+      const result = await loginWithTelegram(data);
+      setBusy(false);
+
+      if (!result.ok) {
+        setError(result.error || "Giris yapilamadi.");
+        if (result.userId) setDeniedId(result.userId);
+        return;
+      }
+      enter(result.user ?? null);
+    },
+    [enter, stopPolling]
+  );
+
+  /* ------------------------------------------------ bot baglantisi ---- */
+  const startBotLogin = useCallback(async () => {
+    stopPolling();
     setBusy(true);
     setError("");
     setDeniedId("");
-    const result = await loginWithTelegram(data);
+
+    const started = await startLinkLogin();
     setBusy(false);
 
-    if (!result.ok) {
-      setError(result.error || "Giris yapilamadi.");
-      if (result.userId) setDeniedId(result.userId);
+    if (!started.ok || !started.data) {
+      setError(started.error || "Bağlantı oluşturulamadı.");
       return;
     }
-    setUser(result.user ?? null);
-    setPhase("in");
-  }, []);
+
+    const { nonce, url } = started.data;
+    setWaiting({ url });
+    // Açılır pencere engellenirse kullanıcı ekrandaki bağlantıya basar.
+    window.open(url, "_blank", "noopener");
+
+    let ticks = 0;
+    polling.current = window.setInterval(async () => {
+      ticks += 1;
+      if (ticks > POLL_LIMIT) {
+        stopPolling();
+        setWaiting(null);
+        setError("Süre doldu. Yeniden deneyin.");
+        return;
+      }
+
+      const state = await claimLink(nonce);
+      if (state.state === "pending") return;
+
+      stopPolling();
+      setWaiting(null);
+
+      if (state.state === "ok") {
+        enter(state.user);
+      } else {
+        setError(state.error);
+        if (state.state === "denied" && state.userId) setDeniedId(state.userId);
+      }
+    }, POLL_MS);
+  }, [enter, stopPolling]);
+
+  const cancelWaiting = useCallback(() => {
+    stopPolling();
+    setWaiting(null);
+  }, [stopPolling]);
 
   const signOut = useCallback(async () => {
     await endSession();
@@ -154,16 +235,55 @@ export default function LoginGate({ children }: { children: ReactNode }) {
           </div>
 
           <p className="text-[12px] text-[var(--text-2)] leading-relaxed">
-            Bu araç yalnızca yetkili Telegram hesaplarına açık. Aşağıdaki düğmeyle giriş
-            yapın; her giriş kayıt kanalına düşer.
+            Bu araç yalnızca yetkili Telegram hesaplarına açık. Aşağıdaki yollardan biriyle
+            giriş yapın; her giriş kayıt kanalına düşer.
           </p>
 
-          {busy ? (
+          {waiting ? (
+            /* Telegram'da Baslat'a basilmasi bekleniyor. */
+            <div className="flex flex-col gap-2.5">
+              <div className="flex items-center gap-2 text-[12px] text-[var(--text-2)]">
+                <IconRefresh size={13} className="shrink-0 animate-spin" />
+                <span>Telegram&apos;da <b>Başlat</b>&apos;a basmanız bekleniyor…</span>
+              </div>
+              <p className="text-[11.5px] text-[var(--text-3)] leading-relaxed">
+                Uygulama açılmadıysa{" "}
+                <a
+                  href={waiting.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--accent)] underline"
+                >
+                  bu bağlantıya
+                </a>{" "}
+                dokunun. Onayladıktan sonra bu sekmeye dönün, giriş kendiliğinden tamamlanır.
+              </p>
+              <button className="btn btn-sm self-start" onClick={cancelWaiting}>
+                Vazgeç
+              </button>
+            </div>
+          ) : busy ? (
             <div className="h-[46px] flex items-center justify-center text-[12px] text-[var(--text-3)]">
               Doğrulanıyor…
             </div>
           ) : (
-            <TelegramButton onAuth={handleAuth} />
+            <>
+              <TelegramButton onAuth={handleAuth} />
+
+              <div className="flex items-center gap-2.5">
+                <span className="flex-1 h-px bg-[var(--line)]" />
+                <span className="text-[10.5px] text-[var(--text-3)]">ya da</span>
+                <span className="flex-1 h-px bg-[var(--line)]" />
+              </div>
+
+              <button className="btn btn-primary w-full" onClick={startBotLogin}>
+                Telegram uygulamasıyla gir
+              </button>
+              <p className="text-[11px] text-[var(--text-3)] leading-relaxed -mt-1.5">
+                Bot sohbeti açılır, <b>Başlat</b>&apos;a basarsınız. Üstteki düğme
+                &quot;Bot domain invalid&quot; derse bu yol her yerde çalışır.
+              </p>
+            </>
           )}
 
           {error && (
@@ -174,11 +294,9 @@ export default function LoginGate({ children }: { children: ReactNode }) {
                 {deniedId && (
                   <>
                     {" "}
-                    Telegram ID&apos;niz: <code className="text-[var(--text-2)]">
-                      {deniedId}
-                    </code>{" "}
-                    — yöneticiye bildirildi. Onaylandığında bu sayfayı yenileyip
-                    girebilirsiniz.
+                    Telegram ID&apos;niz:{" "}
+                    <code className="text-[var(--text-2)]">{deniedId}</code> — yöneticiye
+                    bildirildi. Onaylandığında tekrar deneyin.
                   </>
                 )}
               </span>

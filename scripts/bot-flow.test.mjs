@@ -163,6 +163,70 @@ await reset();
   check("yabanci /ekle kullanamaz", sent[1]?.includes("yetkiniz yok"), sent[1]);
 }
 
+/* 10. bot baglantisiyla giris (derin baglanti) */
+await reset();
+{
+  const start = await fetch(`${APP}/api/auth/link/start`, { method: "POST" });
+  const { nonce, url } = await start.json();
+  check("anahtar uretildi", /^[A-Za-z0-9_-]{16,64}$/.test(nonce || ""), nonce);
+  check("t.me baglantisi dogru", url?.includes(`?start=${nonce}`), url);
+
+  // Bot henuz baglamadi -> beklemede
+  const pending = await fetch(`${APP}/api/auth/link/claim`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nonce }),
+  });
+  check("baglanmadan once beklemede", pending.status === 202, `-> ${pending.status}`);
+
+  // Kullanici Telegram'da Baslat'a basti -> webhook'a /start <anahtar> duser
+  await webhook({
+    message: { chat: { id: 777 }, from: { id: 777, first_name: "Yonetici" }, text: `/start ${nonce}` },
+  });
+  const reply = (await calls()).filter((c) => c.method === "sendMessage").pop()?.body.text ?? "";
+  check("bot onay mesaji verdi", reply.includes("Giris onaylandi"), reply.slice(0, 80));
+
+  const claimed = await fetch(`${APP}/api/auth/link/claim`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nonce }),
+  });
+  check("oturum acildi", claimed.status === 200, `-> ${claimed.status}`);
+  const linkCookie = (claimed.headers.get("set-cookie") || "").split(";")[0];
+  const me = await fetch(`${APP}/api/auth/me`, { headers: { cookie: linkCookie } });
+  check("cerez gecerli", me.status === 200, `-> ${me.status}`);
+
+  // Tek kullanimlik: ayni anahtar ikinci kez calismamali
+  const again = await fetch(`${APP}/api/auth/link/claim`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nonce }),
+  });
+  check("anahtar tek kullanimlik", again.status === 410, `-> ${again.status}`);
+
+  // Uydurma anahtar
+  const bogus = await fetch(`${APP}/api/auth/link/claim`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nonce: "AAAAAAAAAAAAAAAAAAAAAAAA" }),
+  });
+  check("uydurma anahtar reddedildi", bogus.status === 410, `-> ${bogus.status}`);
+
+  // Yetkisiz hesap bot yolundan gelirse de reddedilmeli
+  const s2 = await fetch(`${APP}/api/auth/link/start`, { method: "POST" }).then((r) => r.json());
+  await webhook({
+    message: { chat: { id: 1 }, from: { id: 6161, first_name: "Yabanci" }, text: `/start ${s2.nonce}` },
+  });
+  const denied = await fetch(`${APP}/api/auth/link/claim`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nonce: s2.nonce }),
+  });
+  check("yetkisiz hesap bot yolundan da giremez", denied.status === 403, `-> ${denied.status}`);
+  const dj = await denied.json();
+  check("kendi id'sini soyluyor", dj.userId === "6161", JSON.stringify(dj));
+}
+
 let failed = 0;
 for (const r of results) {
   if (!r.ok) failed++;

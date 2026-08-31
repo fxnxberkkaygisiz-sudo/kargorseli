@@ -30,6 +30,8 @@ Bu yüzden `app/api/` altında şu uçlar var:
 | Uç | İş |
 |---|---|
 | `POST /api/auth/telegram` | Widget verisinin imzasını doğrular, beyaz listeye bakar, oturum çerezini yazar |
+| `POST /api/auth/link/start` | Bot yolu için tek kullanımlık anahtar + `t.me` bağlantısı üretir |
+| `POST /api/auth/link/claim` | Anahtar bota bağlandı mı diye yoklar; bağlandıysa oturumu açar |
 | `GET /api/auth/me` | Çerez hâlâ geçerli mi (süre **ve** beyaz liste her çağrıda yeniden okunur) |
 | `POST /api/auth/logout` | Çerezi siler, çıkışı kanala yazar |
 | `POST /api/log` | Uygulama olaylarını kanala iletir (geçerli oturum şart) |
@@ -39,6 +41,24 @@ Bu yüzden `app/api/` altında şu uçlar var:
 Oturum, HMAC ile imzalı **httpOnly** bir çerezde taşınır: sayfadaki JS (ve dolayısıyla bir
 XSS) okuyamaz. Site ile API aynı origin'de olduğu için üçüncü taraf çerez engelleri de
 devrede değil.
+
+### İki giriş yolu
+
+**1. Telegram Login Widget** — tek tık. Ama yalnız BotFather'da `/setdomain` ile kayıtlı
+alan adında çalışır; başka her yerde iframe **"Bot domain invalid"** der. Bot başına tek
+alan adı kaydedilebiliyor, o yüzden `localhost` ve Vercel'in preview adresleri kapsam dışı.
+
+**2. Bot bağlantısı** — giriş ekranındaki *Telegram uygulamasıyla gir* düğmesi. Sunucu tek
+kullanımlık, 5 dakika ömürlü bir anahtar üretip `t.me/<bot>?start=<anahtar>` bağlantısını
+açar; **Telegram uygulaması devreye girer**, kullanıcı *Başlat*'a basar, bot anahtarı o
+hesaba bağlar (webhook), tarayıcı 2 saniyede bir yoklayıp oturumu alır.
+
+Bu yol **alan adı kaydına hiç bağlı değil** — localhost'ta ve preview adreslerinde de
+çalışır. Anahtar tahmin edilemez, tek kullanımlıktır (ilk kullanımda silinir) ve süresi
+dolar. Yetki kontrolü iki yolda da aynı yerde (`lib/server/login.ts`) yapılır, yani bot
+yolundan gelen yetkisiz biri de aynı şekilde reddedilir ve aynı onay düğmelerini tetikler.
+
+Depo (Upstash) bağlı değilse bot yolu kapalıdır, widget çalışmaya devam eder.
 
 ### Bunun koruduğu ve korumadığı şey
 
@@ -79,7 +99,8 @@ ekleme/silme kapalı kalır ve `/liste` bunu söyler.
 
 - [@BotFather](https://t.me/BotFather) → `/newbot` → token'ı saklayın.
 - `/setdomain` → botu seçin → `kargorseli-nu.vercel.app`.
-  Widget yalnız burada çalışır; `localhost`'ta görünmez.
+  Bu yalnız **widget** için gerekli; bot bağlantısı yolu bu kayda bakmaz. Domain'i yanlış
+  girerseniz widget "Bot domain invalid" der ama site yine kullanılabilir kalır.
 - Log için özel bir kanal açın, botu **yönetici** olarak ekleyin. Kanalın `chat_id`'si
   `-100…` ile başlar; kanala bir mesaj atıp
   `https://api.telegram.org/bot<TOKEN>/getUpdates` adresinden okuyabilirsiniz.
@@ -147,7 +168,7 @@ Log gönderimi ateşle-unut: kanala ulaşmazsa kullanıcının işi durmaz.
 ### Testler
 
 ```bash
-npm run test:auth    # imza dogrulama, oturum, beyaz liste, log bicimi (30 test)
+npm run test:auth    # imza doğrulama, oturum, beyaz liste, log biçimi (30 test)
 ```
 
 Bot akışının uçtan uca testi çalışan bir sunucu ister — gerçek bot/kanal/Upstash
@@ -157,7 +178,7 @@ gerekmez, hepsi taklit edilir:
 cp .env.test.example .env.local
 npm run fake             # ayrı terminal: sahte Telegram + Upstash
 npm run dev -- -p 3111   # ayrı terminal
-npm run test:bot         # 25 test
+npm run test:bot         # 35 test
 ```
 
 ---
@@ -334,7 +355,8 @@ lib/
   auth.ts             Telegram oturumu (istemci tarafı)
   logger.ts           olay loglarını /api/log'a gönderir
   server/auth.ts      imza doğrulama, oturum imzası, kanala log
-  server/store.ts     yetkili listesi (Upstash Redis)
+  server/login.ts     iki giriş yolunun ortak son adımı (yetki + çerez + log)
+  server/store.ts     yetkili listesi ve bağlantı anahtarları (Upstash Redis)
   types.ts            veri modeli
   variants.ts         lot/maliyet varyasyonu + adıma göre gruplama
   template.ts         {{token}} motoru + token seti

@@ -2,6 +2,7 @@ import { tgCall } from "@/lib/server/auth";
 import {
   addUser,
   adminIds,
+  attachLinkUser,
   isAdmin,
   removeUser,
   seedIds,
@@ -11,13 +12,15 @@ import {
 } from "@/lib/server/store";
 
 /**
- * Telegram bot webhook'u - yetkili listesini bot uzerinden yonetmek icin.
+ * Telegram bot webhook'u. Uc is yapiyor:
  *
- * Iki giris yolu var:
- *   - Kanaldaki "giris reddedildi" mesajinin altindaki Onayla / Yoksay tuslari.
- *   - /ekle, /sil, /liste komutlari.
+ *   1. /start <anahtar> - siteden gelen derin baglantiyla giris. Herkese
+ *      acik; yetki kontrolu tarayicinin /api/auth/link/claim istegi
+ *      geldiginde yapiliyor.
+ *   2. Kanaldaki "giris reddedildi" mesajinin altindaki Onayla / Yoksay.
+ *   3. /ekle, /sil, /liste komutlari.
  *
- * Ikisi de yalniz TG_ADMIN_IDS (tanimli degilse ALLOWED_USER_IDS) icindeki
+ * 2 ve 3 yalniz TG_ADMIN_IDS (tanimli degilse ALLOWED_USER_IDS) icindeki
  * hesaplara acik. Adres tahmin edilse bile Telegram'in gonderdigi gizli
  * baslik dogrulanmadan hicbir sey yapilmaz.
  *
@@ -98,6 +101,23 @@ async function handleCommand(text: string, from: TgUser): Promise<string> {
   const [raw, ...rest] = text.trim().split(/\s+/);
   // Gruplarda komutlar /ekle@botadi seklinde gelir.
   const cmd = raw.split("@")[0].toLowerCase();
+
+  // Siteden gelen derin baglanti: /start <anahtar>. Anahtari bu hesaba
+  // baglar, tarayici da yoklayip oturumu alir. Yetki kontrolu tarayicinin
+  // istegi geldiginde yapiliyor - IP/tarayici bilgisi orada.
+  if (cmd === "/start" && rest[0]) {
+    const nonce = rest[0];
+    if (!/^[A-Za-z0-9_-]{16,64}$/.test(nonce)) return HELP;
+
+    const ok = await attachLinkUser(nonce, {
+      id: String(from.id),
+      name: fullName(from),
+      username: from.username,
+    });
+    return ok
+      ? "✅ Giris onaylandi. Tarayici sekmesine donebilirsiniz."
+      : "⌛ Bu baglantinin suresi dolmus. Sitedeki giris dugmesine yeniden basin.";
+  }
 
   if (cmd === "/id") {
     return `Telegram id'niz: <code>${from.id}</code>`;

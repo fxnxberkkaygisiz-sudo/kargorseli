@@ -172,6 +172,85 @@ export async function rememberPending(user: AllowedUser): Promise<void> {
   await command(["HSET", PENDING_KEY, id, JSON.stringify(meta)]);
 }
 
+/* -------------------------------------------------- baglanti anahtari --- */
+
+/**
+ * Derin baglantiyla giris: tarayici tek kullanimlik bir anahtar alir,
+ * kullanici t.me/<bot>?start=<anahtar> baglantisini Telegram uygulamasinda
+ * acar, bot /start ile anahtari o hesaba baglar, tarayici da anahtari
+ * yoklayarak oturumu alir.
+ *
+ * Anahtar tahmin edilemez, tek kullanimlik ve kisa omurludur. Bu yol
+ * BotFather'daki alan adi kaydina bagli degil - widget'in "Bot domain
+ * invalid" verdigi her yerde (preview adresleri, localhost) calisir.
+ */
+const LINK_PREFIX = "kg:link:";
+const LINK_TTL = 300;
+
+export interface LinkToken {
+  status: "pending" | "ready";
+  user?: AllowedUser;
+}
+
+/** t.me start parametresi yalniz A-Za-z0-9_- kabul ediyor. */
+export function newLinkNonce(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+export async function createLinkToken(): Promise<string | null> {
+  if (!storeConfigured()) return null;
+  const nonce = newLinkNonce();
+  const res = await command<string>([
+    "SET",
+    LINK_PREFIX + nonce,
+    JSON.stringify({ status: "pending" } satisfies LinkToken),
+    "EX",
+    LINK_TTL,
+  ]);
+  return res === null ? null : nonce;
+}
+
+/** Bot /start ile geldiginde anahtari kullaniciya baglar. */
+export async function attachLinkUser(nonce: string, user: AllowedUser): Promise<boolean> {
+  if (!storeConfigured() || !nonce) return false;
+
+  const raw = await command<string | null>(["GET", LINK_PREFIX + nonce]);
+  if (!raw) return false;
+
+  const res = await command<string>([
+    "SET",
+    LINK_PREFIX + nonce,
+    JSON.stringify({ status: "ready", user } satisfies LinkToken),
+    "EX",
+    LINK_TTL,
+  ]);
+  return res !== null;
+}
+
+/**
+ * Tarayicinin yoklamasi. Hazirsa anahtari siler - tek kullanimlik olmasi
+ * boyle saglaniyor; ayni anahtarla ikinci kez oturum alinamaz.
+ */
+export async function pollLinkToken(nonce: string): Promise<LinkToken | null> {
+  if (!storeConfigured() || !nonce) return null;
+
+  const raw = await command<string | null>(["GET", LINK_PREFIX + nonce]);
+  if (!raw) return null;
+
+  let parsed: LinkToken;
+  try {
+    parsed = JSON.parse(raw) as LinkToken;
+  } catch {
+    return null;
+  }
+
+  if (parsed.status === "ready") await command(["DEL", LINK_PREFIX + nonce]);
+  return parsed;
+}
+
 export async function takePending(id: string): Promise<AllowedUser> {
   if (!storeConfigured()) return { id };
 

@@ -8,6 +8,7 @@ import { createServer } from "node:http";
 const BOT_TOKEN = "123456:TEST-TOKEN";
 const enc = new TextEncoder();
 const hashes = new Map(); // key -> Map(field -> value)
+const strings = new Map(); // key -> value (TTL onemsenmiyor)
 const sentCalls = [];
 
 async function sign(data) {
@@ -36,6 +37,13 @@ function redis(args) {
       return [...map.keys()];
     case "HGETALL":
       return [...map.entries()].flat();
+    case "SET":
+      strings.set(key, String(rest[0]));
+      return "OK";
+    case "GET":
+      return strings.get(key) ?? null;
+    case "DEL":
+      return strings.delete(key) || hashes.delete(key) ? 1 : 0;
     default:
       return null;
   }
@@ -67,7 +75,10 @@ createServer(async (req, res) => {
     return json({ ok: true });
   }
   if (req.url.startsWith("/_dump")) {
-    return json(Object.fromEntries([...hashes].map(([k, v]) => [k, Object.fromEntries(v)])));
+    return json({
+      ...Object.fromEntries([...hashes].map(([k, v]) => [k, Object.fromEntries(v)])),
+      ...Object.fromEntries(strings),
+    });
   }
 
   if (req.url.startsWith("/kv")) {
