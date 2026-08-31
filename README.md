@@ -14,6 +14,21 @@ npm run sync     # public/templates/ klasörünü tarayıp manifest.json'ı gün
 `next.config.ts` içinde `output: "export"` açık; `npm run build` sonrası `out/` klasörünü
 herhangi bir statik hostinge (Vercel, Netlify, nginx, IIS) atabilirsiniz.
 
+### GitHub Pages
+
+`main` dalına her push'ta `.github/workflows/deploy.yml` çalışır ve siteyi yayınlar:
+
+**https://fxnxberkkaygisiz-sudo.github.io/kargorseli/**
+
+İlk kullanımda depo ayarlarından bir kez açmak gerekir:
+**Settings → Pages → Build and deployment → Source: "GitHub Actions"**
+
+Site alt yolda (`/kargorseli/`) yayınlandığı için workflow build'i
+`NEXT_PUBLIC_BASE_PATH=/kargorseli` ile alır. `trailingSlash: true` da şart:
+şablonlar `templates/manifest.json` gibi göreli yollarla çekiliyor, adres
+sonunda `/` olmazsa göreli yol `/templates/...` olarak çözülür ve 404 verir.
+Yerel geliştirmede `NEXT_PUBLIC_BASE_PATH` boş kalır, site kökte çalışır.
+
 ---
 
 ## Akış
