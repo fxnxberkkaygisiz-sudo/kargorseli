@@ -21,11 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # enablement: true -> depoda Pages kapaliysa "GitHub Actions" kaynagiyla
-      # kendiliginden acar; ayarlardan elle etkinlestirmek gerekmez.
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # Not: Pages'in depo ayarlarindan bir kez acilmasi gerekiyor —
+      # Settings > Pages > Build and deployment > Source: "GitHub Actions".
+      # (configure-pages@v5 enablement:true denendi, varsayilan GITHUB_TOKEN
+      #  Pages sitesini olusturmaya yetmedigi icin adim hata veriyordu.)
 
       - uses: actions/setup-node@v4
         with:
