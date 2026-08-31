@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import InputPanel from "@/components/InputPanel";
 import PreviewCard, { type PreviewHandle } from "@/components/PreviewCard";
 import TemplateGallery from "@/components/TemplateGallery";
-import { IconAlert, IconCheck, IconDownload, IconLayers } from "@/components/Icons";
+import { useSession } from "@/components/LoginGate";
+import { IconAlert, IconCheck, IconDownload, IconLayers, IconLogout } from "@/components/Icons";
 import type { GeneratorConfig, TemplateMeta } from "@/lib/types";
 import { buildVariants, groupByStep } from "@/lib/variants";
 import { listScope, renderTemplate, variantScope } from "@/lib/template";
@@ -13,6 +14,7 @@ import { downloadDataUrl, downloadZip, copyToClipboard, type ImageFormat } from 
 import { DEFAULT_API_BASE } from "@/lib/quotes";
 import { fetchLogoDataUrl } from "@/lib/logos";
 import { slug } from "@/lib/format";
+import { configDetail, logError, logEvent } from "@/lib/logger";
 import { BUNDLED_HTML, BUNDLED_TEMPLATES } from "@/lib/templates.generated";
 
 const STORAGE_KEY = "kg-config-v2";
@@ -51,6 +53,7 @@ const BASE = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/+$/, "");
 const templateUrl = (file: string) => `${BASE}/templates/${file}`;
 
 export default function Page() {
+  const { user, signOut } = useSession();
   const [cfg, setCfg] = useState<GeneratorConfig>(DEFAULT_CONFIG);
   const [apiBase, setApiBase] = useState(DEFAULT_API_BASE);
   const [templates, setTemplates] = useState<TemplateMeta[]>([]);
@@ -69,6 +72,7 @@ export default function Page() {
   const handles = useRef(new Map<string, PreviewHandle>());
   const triedLogos = useRef(new Set<string>());
   const templateCache = useRef(new Map<string, string>());
+  const loggedOpen = useRef(false);
 
   /* ------------------------------------------------ kalici ayarlar ---- */
   useEffect(() => {
@@ -231,6 +235,21 @@ export default function Page() {
     setSelected(new Set(items.map((i) => i.id)));
   }, [items]);
 
+  /* ------------------------------------------------------------ log ---- */
+  // Oturum acilip sablonlar geldikten sonra bir kez: kim, neyle basladi.
+  useEffect(() => {
+    if (loggedOpen.current || !user || templates.length === 0) return;
+    loggedOpen.current = true;
+    logEvent("open", {
+      ...configDetail(cfg, template),
+      ekran: `${window.screen.width}x${window.screen.height}`,
+      "gomulu sablon": usingBundled,
+    });
+    // cfg/template kasitli olarak bagimlilik degil: acilis anindaki durumu
+    // bir kez yaziyoruz, her degisiklikte degil.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, templates.length]);
+
   /** Galeri kucuk onizlemesi: gercek veriyle doldurulur. */
   const renderSample = useCallback(
     (t: TemplateMeta, html: string) => {
@@ -278,8 +297,15 @@ export default function Page() {
       if (!dataUrl) throw new Error("Görsel oluşturulamadı");
       downloadDataUrl(dataUrl, `${item.filename}.${format}`);
       setStatus({ kind: "ok", text: `${item.filename}.${format} indirildi.` });
+      logEvent("download", {
+        dosya: `${item.filename}.${format}`,
+        pozisyon: `${item.label} - ${item.sublabel}`,
+        cozunurluk: `${pixelRatio}x`,
+        ...configDetail(cfg, template),
+      });
     } catch (err) {
       setStatus({ kind: "err", text: err instanceof Error ? err.message : "Bilinmeyen hata" });
+      logError("tek indirme", err, { dosya: item.filename });
     } finally {
       setBusyId("");
     }
@@ -297,8 +323,15 @@ export default function Page() {
           ? { kind: "ok", text: "Panoya kopyalandı." }
           : { kind: "err", text: "Tarayıcı panoya görsel kopyalamayı desteklemiyor." }
       );
+      if (ok) {
+        logEvent("copy", {
+          pozisyon: `${item.label} - ${item.sublabel}`,
+          ...configDetail(cfg, template),
+        });
+      }
     } catch (err) {
       setStatus({ kind: "err", text: err instanceof Error ? err.message : "Bilinmeyen hata" });
+      logError("panoya kopyalama", err, { dosya: item.filename });
     } finally {
       setBusyId("");
     }
@@ -329,8 +362,20 @@ export default function Page() {
         );
         setStatus({ kind: "ok", text: `${entries.length} görsel ZIP olarak indirildi.` });
       }
+      logEvent("download_batch", {
+        adet: entries.length,
+        paket: entries.length > 1 ? "ZIP" : "tek dosya",
+        bicim: format,
+        cozunurluk: `${pixelRatio}x`,
+        dosyalar: entries
+          .slice(0, 8)
+          .map((e) => e.filename)
+          .join(", "),
+        ...configDetail(cfg, template),
+      });
     } catch (err) {
       setStatus({ kind: "err", text: err instanceof Error ? err.message : "Bilinmeyen hata" });
+      logError("toplu indirme", err, { secili: chosen.length });
     } finally {
       setExporting(false);
     }
@@ -419,6 +464,20 @@ export default function Page() {
             <IconDownload size={13} />
             {exporting ? "Hazırlanıyor…" : `İndir (${selected.size})`}
           </button>
+
+          {user && (
+            <div className="flex items-center gap-1.5 pl-2 ml-1 border-l border-[var(--line)]">
+              <span
+                className="chip-tag max-w-[150px] truncate"
+                title={`Telegram ID ${user.id}${user.username ? ` · @${user.username}` : ""}`}
+              >
+                {user.username ? `@${user.username}` : user.name || user.id}
+              </span>
+              <button className="btn btn-sm btn-icon" onClick={signOut} title="Çıkış yap">
+                <IconLogout size={13} />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

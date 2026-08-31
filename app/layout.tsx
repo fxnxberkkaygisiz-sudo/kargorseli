@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import LoginGate from "@/components/LoginGate";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +13,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr">
-      <body>{children}</body>
+      <body>
+        {/* Telegram girisi yapilandirilmamissa kapi seffaftir, uygulama acik acilir. */}
+        <LoginGate>{children}</LoginGate>
+      </body>
     </html>
   );
 }

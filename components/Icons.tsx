@@ -54,3 +54,6 @@ export const IconAlert = ({ size = 14, className }: P) => (
 export const IconSpinner = ({ size = 14, className }: P) => (
   <svg {...base(size)} className={className}><path d="M12 3a9 9 0 1 0 9 9" /></svg>
 );
+export const IconLogout = ({ size = 14, className }: P) => (
+  <svg {...base(size)} className={className}><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11" /></svg>
+);

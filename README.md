@@ -1,33 +1,164 @@
 # Kâr Görseli Üretici
 
 Hisse + lot + maliyet parametrelerinden **25 hazır şablonla** portföy/pozisyon görselleri üretir
-ve tarayıcıdan PNG/JPEG olarak indirir. Sunucu tarafı yoktur — görseller tarayıcıda
-`html-to-image` ile oluşturulur.
+ve tarayıcıdan PNG/JPEG olarak indirir. Görseller tarayıcıda `html-to-image` ile oluşturulur;
+sunucu tarafı yalnız Telegram girişi ve kayıt loglarını üstlenir.
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
-npm run build    # out/ klasörüne statik site
-npm run sync     # public/templates/ klasörünü tarayıp manifest.json'ı günceller
+npm run dev        # http://localhost:3000
+npm run build      # üretim derlemesi
+npm run sync       # public/templates/ klasörünü tarayıp manifest.json'ı günceller
+npm run test:auth  # imza / oturum / log birim testleri
 ```
 
-`next.config.ts` içinde `output: "export"` açık; `npm run build` sonrası `out/` klasörünü
-herhangi bir statik hostinge (Vercel, Netlify, nginx, IIS) atabilirsiniz.
+Site **Vercel**'de yayınlanıyor: **https://kargorseli-nu.vercel.app/**
+`main` dalına her push'ta kendiliğinden deploy olur.
 
-### GitHub Pages
+Alt yolda bir yere kurulacaksa `NEXT_PUBLIC_BASE_PATH` verilir (şablonlar ve `/api`
+yolları bu öneki kullanır); boş bırakılırsa site kökte çalışır.
 
-`main` dalına her push'ta `.github/workflows/deploy.yml` çalışır ve siteyi yayınlar:
+---
 
-**https://fxnxberkkaygisiz-sudo.github.io/kargorseli/**
+## Telegram girişi ve kayıt kanalı
 
-İlk kullanımda depo ayarlarından bir kez açmak gerekir:
-**Settings → Pages → Build and deployment → Source: "GitHub Actions"**
+Uygulama yalnız yetkili Telegram hesaplarına açık, ve her önemli olay bir Telegram
+kanalına düşüyor. Doğrulama tarayıcıda yapılamaz — Telegram'ın döndürdüğü veri bot
+token'ıyla HMAC doğrulaması ister, token da herkesin indirebileceği JS'e konulamaz.
+Bu yüzden `app/api/` altında şu uçlar var:
 
-Site alt yolda (`/kargorseli/`) yayınlandığı için workflow build'i
-`NEXT_PUBLIC_BASE_PATH=/kargorseli` ile alır. `trailingSlash: true` da şart:
-şablonlar `templates/manifest.json` gibi göreli yollarla çekiliyor, adres
-sonunda `/` olmazsa göreli yol `/templates/...` olarak çözülür ve 404 verir.
-Yerel geliştirmede `NEXT_PUBLIC_BASE_PATH` boş kalır, site kökte çalışır.
+| Uç | İş |
+|---|---|
+| `POST /api/auth/telegram` | Widget verisinin imzasını doğrular, beyaz listeye bakar, oturum çerezini yazar |
+| `GET /api/auth/me` | Çerez hâlâ geçerli mi (süre **ve** beyaz liste her çağrıda yeniden okunur) |
+| `POST /api/auth/logout` | Çerezi siler, çıkışı kanala yazar |
+| `POST /api/log` | Uygulama olaylarını kanala iletir (geçerli oturum şart) |
+| `POST /api/telegram/webhook` | Bot komutları ve onay düğmeleri |
+| `GET /api/health` | Hangi ortam değişkeninin eksik olduğunu gösterir |
+
+Oturum, HMAC ile imzalı **httpOnly** bir çerezde taşınır: sayfadaki JS (ve dolayısıyla bir
+XSS) okuyamaz. Site ile API aynı origin'de olduğu için üçüncü taraf çerez engelleri de
+devrede değil.
+
+### Bunun koruduğu ve korumadığı şey
+
+Beyaz listede olmayan kimse giriş yapamaz, log atamaz. Ama uygulama bir istemci
+uygulaması: sayfanın JS'i herkesin indirebileceği yerde duruyor. Yani giriş ekranı
+**arayüzü kapatır, kodu kapatmaz** — kararlı biri bundle'ı indirip kendi makinesinde
+çalıştırabilir. Şablonların da yalnız yetkiliye servis edilmesi gerekiyorsa bu ayrı bir iş.
+
+### Yetkili listesini bot yönetir
+
+Liste iki parçadan oluşur:
+
+1. **`ALLOWED_USER_IDS`** — çekirdek liste, ortam değişkeninde. Buradakiler bot ile
+   silinemez; kendinizi dışarıda bırakmanın yolu yok. Depo çökse bile bunlar girebilir.
+2. **Upstash Redis'teki kayıtlar** — bot üzerinden eklenip silinenler.
+
+Yetkisiz biri giriş denediğinde kanala düşen mesajın altında **✅ Onayla / ✖️ Yoksay**
+düğmeleri çıkar. Onayla'ya basınca kişi listeye eklenir, sayfayı yenileyip girer.
+Düğmeler yalnız `TG_ADMIN_IDS` (tanımlı değilse `ALLOWED_USER_IDS`) içindeki hesaplarda
+çalışır; başkası bastığında uyarı alır ve hiçbir şey değişmez.
+
+Bota yazılabilen komutlar:
+
+| Komut | İş |
+|---|---|
+| `/liste` | Yetkili kullanıcılar (çekirdek + bot ile eklenenler) |
+| `/ekle 123456789` | Kullanıcıyı yetkilendir |
+| `/sil 123456789` | Yetkiyi kaldır — **açık oturumu da anında düşer** |
+| `/id` | Kendi Telegram id'ni söyler (herkese açık) |
+| `/yardim` | Komut listesi |
+
+Depo (Upstash) yapılandırılmamışsa uygulama çalışmaya devam eder, sadece bot ile
+ekleme/silme kapalı kalır ve `/liste` bunu söyler.
+
+### Kurulum
+
+**1. Bot ve kanal**
+
+- [@BotFather](https://t.me/BotFather) → `/newbot` → token'ı saklayın.
+- `/setdomain` → botu seçin → `kargorseli-nu.vercel.app`.
+  Widget yalnız burada çalışır; `localhost`'ta görünmez.
+- Log için özel bir kanal açın, botu **yönetici** olarak ekleyin. Kanalın `chat_id`'si
+  `-100…` ile başlar; kanala bir mesaj atıp
+  `https://api.telegram.org/bot<TOKEN>/getUpdates` adresinden okuyabilirsiniz.
+
+**2. Upstash Redis**
+
+Vercel panelinde **Storage → Marketplace → Upstash Redis** ile bağlayın; `KV_REST_API_URL`
+ve `KV_REST_API_TOKEN` ortam değişkenlerini kendisi ekler. (Upstash'in kendi panelini
+kullanırsanız `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` adları da kabul edilir.)
+
+**3. Vercel ortam değişkenleri**
+
+**Settings → Environment Variables**:
+
+| Değişken | Değer |
+|---|---|
+| `NEXT_PUBLIC_TG_BOT` | Bot kullanıcı adı, `@` olmadan. **Boş bırakılırsa giriş kapısı devre dışı kalır.** |
+| `TG_BOT_TOKEN` | BotFather token'ı |
+| `TG_LOG_CHAT_ID` | Log kanalının `-100…` id'si |
+| `SESSION_SECRET` | Uzun rastgele dize |
+| `ALLOWED_USER_IDS` | Çekirdek liste — en az kendi Telegram id'niz |
+| `TG_ADMIN_IDS` | Onay/komut yetkisi. Boşsa `ALLOWED_USER_IDS` geçerli olur |
+| `TG_WEBHOOK_SECRET` | Uzun rastgele dize (bot webhook'unun gizli başlığı) |
+
+Rastgele dize üretmek için:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Kendi Telegram id'nizi bilmiyorsanız: `ALLOWED_USER_IDS`'i boş bırakıp bir kez giriş
+deneyin, giriş ekranı id'nizi söyler.
+
+**4. Webhook'u kur**
+
+Deploy bittikten sonra, `.env.local` dosyanızda `TG_BOT_TOKEN` ve `TG_WEBHOOK_SECRET`
+üretimdekiyle aynıysa:
+
+```bash
+npm run webhook -- https://kargorseli-nu.vercel.app
+npm run webhook -- --durum     # kuruldu mu
+npm run webhook -- --sil       # kaldır
+```
+
+Sonra `https://kargorseli-nu.vercel.app/api/health` adresini açın; her alan `true`
+olmalı. Bota `/yardim` yazarak da doğrulayabilirsiniz.
+
+### Kanala düşen loglar
+
+Her satırda kullanıcı (ad, @kullanıcı, ID), İstanbul saati, IP + ülke/şehir ve tarayıcı
+bilgisi olur; bunları sunucu isteğin kendisinden okur. Uygulamaya özel ayrıntılar:
+
+| Olay | Ek bilgi |
+|---|---|
+| Giriş / reddedildi / geçersiz imza | oturum süresi; reddedilende onay düğmeleri |
+| Uygulama açıldı | şablon, hisseler + fiyatları, lot/maliyet ayarları, ekran çözünürlüğü |
+| Görsel indirildi | dosya adı, pozisyon, çözünürlük, tüm portföy ayarları |
+| Toplu indirme | adet, ZIP mi, biçim, ilk 8 dosya adı |
+| Panoya kopyalandı | pozisyon + ayarlar |
+| Hata | nerede olduğu ve hata mesajı |
+| Çıkış | — |
+
+Log gönderimi ateşle-unut: kanala ulaşmazsa kullanıcının işi durmaz.
+
+### Testler
+
+```bash
+npm run test:auth    # imza dogrulama, oturum, beyaz liste, log bicimi (30 test)
+```
+
+Bot akışının uçtan uca testi çalışan bir sunucu ister — gerçek bot/kanal/Upstash
+gerekmez, hepsi taklit edilir:
+
+```bash
+cp .env.test.example .env.local
+npm run fake             # ayrı terminal: sahte Telegram + Upstash
+npm run dev -- -p 3111   # ayrı terminal
+npm run test:bot         # 25 test
+```
 
 ---
 
@@ -198,8 +329,12 @@ eğridir; fiyatın gerçek geçmişi değil, giriş → güncel hareketinin şem
 
 ```
 app/                  arayüz (tek sayfa)
-components/           InputPanel, PreviewCard
+components/           InputPanel, PreviewCard, LoginGate
 lib/
+  auth.ts             Telegram oturumu (istemci tarafı)
+  logger.ts           olay loglarını /api/log'a gönderir
+  server/auth.ts      imza doğrulama, oturum imzası, kanala log
+  server/store.ts     yetkili listesi (Upstash Redis)
   types.ts            veri modeli
   variants.ts         lot/maliyet varyasyonu + adıma göre gruplama
   template.ts         {{token}} motoru + token seti
@@ -209,5 +344,11 @@ lib/
   quotes.ts           BIST fiyat API istemcisi
   logos.ts            Matriks logo servisi
 public/templates/     25 şablon + manifest.json
-scripts/sync-templates.mjs
+app/api/              giriş, log ve bot webhook uçları
+scripts/
+  sync-templates.mjs  şablonları tarar, manifest + gömülü kopya üretir
+  auth.test.mjs       imza / oturum / log birim testleri
+  bot-flow.test.mjs   bot ile yetkilendirme uçtan uca testi
+  fake-services.mjs   test için sahte Telegram + Upstash
+  set-webhook.mjs     bot webhook'unu kurar
 ```

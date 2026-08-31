@@ -8,3 +8,6 @@ next-env.d.ts
 .playwright-mcp/
 .DS_Store
 Thumbs.db
+
+# ortam degiskenleri
+.env*.local

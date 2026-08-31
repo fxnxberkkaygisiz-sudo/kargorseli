@@ -7,14 +7,19 @@
     "build": "next build",
     "start": "next start",
     "sync": "node scripts/sync-templates.mjs",
-    "prebuild": "node scripts/sync-templates.mjs"
+    "prebuild": "node scripts/sync-templates.mjs",
+    "test:auth": "node --conditions=react-server scripts/auth.test.mjs",
+    "webhook": "node scripts/set-webhook.mjs",
+    "test:bot": "node scripts/bot-flow.test.mjs",
+    "fake": "node scripts/fake-services.mjs"
   },
   "dependencies": {
     "html-to-image": "^1.11.13",
     "jszip": "^3.10.1",
     "next": "16.3.3",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

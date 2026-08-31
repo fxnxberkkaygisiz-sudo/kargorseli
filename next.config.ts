@@ -1,17 +1,17 @@
 import type { NextConfig } from "next";
 
 /**
- * GitHub Pages alt yolda yayinlaniyor (.../kargorseli/), bu yuzden basePath
- * gerekiyor. Yerel gelistirmede ve Vercel'de bos kalir, site kokte calisir.
- * Workflow build sirasinda NEXT_PUBLIC_BASE_PATH=/kargorseli veriyor.
+ * Site Vercel'de kokte yayinlaniyor, basePath bos kaliyor. Alt yolda bir yere
+ * (ornegin GitHub Pages) kurulacaksa NEXT_PUBLIC_BASE_PATH verilir; sablon ve
+ * /api yollari bu oneki kullaniyor.
  *
- * Sablonlar `${NEXT_PUBLIC_BASE_PATH}/templates/...` seklinde mutlak yolla
- * cekiliyor; bu yuzden trailingSlash gibi bir ayara ihtiyac yok.
+ * Not: `output: "export"` kaldirildi. Telegram girisi ve kanal loglari
+ * app/api altindaki route handler'larda calisiyor; statik export bunlari
+ * derlemez. Statik bir kopya gerekirse giris kapisi da devre disi kalir.
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
-  output: "export",
   images: { unoptimized: true },
   basePath,
 };
