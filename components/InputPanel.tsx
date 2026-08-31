@@ -4,6 +4,16 @@ import { useState } from "react";
 import type { Currency, GeneratorConfig, Holding, StepMode, VariantMode } from "@/lib/types";
 import { fetchQuotes } from "@/lib/quotes";
 import { fetchLogos } from "@/lib/logos";
+import Section from "./Section";
+import {
+  IconAlert,
+  IconImage,
+  IconPlus,
+  IconRefresh,
+  IconSliders,
+  IconTrash,
+  IconWallet,
+} from "./Icons";
 
 interface Props {
   cfg: GeneratorConfig;
@@ -11,6 +21,7 @@ interface Props {
   apiBase: string;
   onApiBaseChange: (value: string) => void;
   variantCount: number;
+  imageCount: number;
 }
 
 function newHolding(): Holding {
@@ -23,36 +34,10 @@ export default function InputPanel({
   apiBase,
   onApiBaseChange,
   variantCount,
+  imageCount,
 }: Props) {
-  const [fetching, setFetching] = useState(false);
-  const [apiMsg, setApiMsg] = useState<string>("");
-  const [showApi, setShowApi] = useState(false);
-  const [logoBusy, setLogoBusy] = useState(false);
-  const [logoMsg, setLogoMsg] = useState<string>("");
-
-  /** Matriks logo servisinden logolari cekip data URI olarak saklar. */
-  async function pullLogos() {
-    setLogoBusy(true);
-    setLogoMsg("");
-    try {
-      const codes = cfg.holdings.map((h) => h.code);
-      const results = await fetchLogos(codes);
-      onChange({
-        ...cfg,
-        holdings: cfg.holdings.map((h, i) =>
-          results[i]?.ok ? { ...h, logo: results[i].dataUrl } : h
-        ),
-      });
-      const failed = results.filter((r) => !r.ok).map((r) => r.code || "?");
-      setLogoMsg(
-        failed.length === 0
-          ? `${results.length} logo yüklendi.`
-          : `${results.length - failed.length} logo yüklendi, bulunamayan: ${failed.join(", ")}`
-      );
-    } finally {
-      setLogoBusy(false);
-    }
-  }
+  const [busy, setBusy] = useState<"" | "quotes" | "logos">("");
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const set = <K extends keyof GeneratorConfig>(key: K, value: GeneratorConfig[K]) =>
     onChange({ ...cfg, [key]: value });
@@ -64,11 +49,10 @@ export default function InputPanel({
     });
 
   async function pullQuotes() {
-    setFetching(true);
-    setApiMsg("");
+    setBusy("quotes");
+    setMsg(null);
     try {
       const results = await fetchQuotes(apiBase, cfg.holdings);
-      const okCount = results.filter((r) => r.ok).length;
       onChange({
         ...cfg,
         holdings: cfg.holdings.map((h, i) => {
@@ -78,131 +62,83 @@ export default function InputPanel({
             ...h,
             name: r.name ?? h.name,
             price: r.price ?? h.price,
-            logo: r.logo ?? h.logo,
             dailyChangePercent: r.dailyChangePercent,
           };
         }),
       });
       const failed = results.filter((r) => !r.ok);
-      setApiMsg(
+      setMsg(
         failed.length === 0
-          ? `${okCount} fiyat güncellendi.`
-          : `${okCount} başarılı, ${failed.length} başarısız: ${failed
-              .map((f) => `${f.code} (${f.error})`)
-              .join(", ")}`
+          ? { kind: "ok", text: `${results.length} fiyat güncellendi.` }
+          : {
+              kind: "err",
+              text: `${results.length - failed.length} başarılı · ${failed
+                .map((f) => `${f.code} (${f.error})`)
+                .join(", ")}`,
+            }
       );
     } finally {
-      setFetching(false);
+      setBusy("");
+    }
+  }
+
+  async function pullLogos() {
+    setBusy("logos");
+    setMsg(null);
+    try {
+      const results = await fetchLogos(cfg.holdings.map((h) => h.code));
+      onChange({
+        ...cfg,
+        holdings: cfg.holdings.map((h, i) =>
+          results[i]?.ok ? { ...h, logo: results[i].dataUrl } : h
+        ),
+      });
+      const failed = results.filter((r) => !r.ok).map((r) => r.code || "?");
+      setMsg(
+        failed.length === 0
+          ? { kind: "ok", text: `${results.length} logo yüklendi.` }
+          : { kind: "err", text: `Bulunamayan logo: ${failed.join(", ")}` }
+      );
+    } finally {
+      setBusy("");
     }
   }
 
   const paired = cfg.mode === "paired";
+  const validHoldings = cfg.holdings.filter((h) => h.code.trim()).length;
 
   return (
-    <div className="space-y-4">
-      {/* ---- Başlık bilgileri ---- */}
-      <section className="panel p-4 space-y-3">
-        <h2 className="text-sm font-semibold">Görsel başlığı</h2>
-        <div>
-          <label className="lbl">Başlık / rumuz</label>
-          <input
-            className="field"
-            value={cfg.brand}
-            onChange={(e) => set("brand", e.target.value)}
-            placeholder="Portföy"
-          />
-        </div>
-        <div>
-          <label className="lbl">Alt başlık (opsiyonel)</label>
-          <input
-            className="field"
-            value={cfg.subtitle}
-            onChange={(e) => set("subtitle", e.target.value)}
-            placeholder="Uzun vadeli pozisyon"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="lbl">Para birimi</label>
-            <select
-              className="field"
-              value={cfg.currency}
-              onChange={(e) => set("currency", e.target.value as Currency)}
-            >
-              <option value="TRY">TRY (₺)</option>
-              <option value="USD">USD ($)</option>
-              <option value="EUR">EUR (€)</option>
-            </select>
-          </div>
-          <div>
-            <label className="lbl">Tarih</label>
-            <input
-              type="date"
-              className="field"
-              value={cfg.dateISO.slice(0, 10)}
-              onChange={(e) => set("dateISO", e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="lbl">Kullanılabilir bakiye</label>
-            <input
-              className="field"
-              type="number"
-              step="0.01"
-              value={cfg.cashBalance || ""}
-              placeholder="0"
-              onChange={(e) => set("cashBalance", Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <label className="lbl">Hesap no (opsiyonel)</label>
-            <input
-              className="field"
-              value={cfg.accountNo}
-              placeholder="—"
-              onChange={(e) => set("accountNo", e.target.value)}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ---- Hisseler ---- */}
-      <section className="panel p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Hisseler</h2>
-          <button
-            className="btn btn-sm"
-            onClick={() => onChange({ ...cfg, holdings: [...cfg.holdings, newHolding()] })}
-          >
-            + Ekle
-          </button>
-        </div>
-
-        <div className="grid grid-cols-[72px_1fr_78px_78px_26px] gap-2 text-[10px] text-[var(--muted)] px-1">
-          <span>Kod</span>
-          <span>Ad</span>
-          <span>Fiyat</span>
-          <span>Maliyet</span>
+    <div className="space-y-2.5">
+      {/* ---------------------------------------------------- hisseler ---- */}
+      <Section
+        title="Hisseler"
+        icon={<IconWallet />}
+        hint={`${validHoldings} hisse`}
+      >
+        <div className="grid grid-cols-[1fr_74px_74px_28px] gap-1.5 px-0.5">
+          <span className="lbl !mb-0">Kod / ad</span>
+          <span className="lbl !mb-0">Fiyat</span>
+          <span className="lbl !mb-0">Maliyet</span>
           <span />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {cfg.holdings.map((h) => (
-            <div key={h.id} className="grid grid-cols-[72px_1fr_78px_78px_26px] gap-2 items-center">
-              <input
-                className="field"
-                value={h.code}
-                placeholder="KOD"
-                onChange={(e) => setHolding(h.id, { code: e.target.value.toUpperCase() })}
-              />
-              <input
-                className="field"
-                value={h.name}
-                placeholder="Şirket adı"
-                onChange={(e) => setHolding(h.id, { name: e.target.value })}
-              />
+            <div key={h.id} className="grid grid-cols-[1fr_74px_74px_28px] gap-1.5 items-start">
+              <div className="space-y-1.5">
+                <input
+                  className="field font-semibold"
+                  value={h.code}
+                  placeholder="KOD"
+                  onChange={(e) => setHolding(h.id, { code: e.target.value.toUpperCase() })}
+                />
+                <input
+                  className="field !h-[30px] !text-[12px]"
+                  value={h.name}
+                  placeholder="Şirket adı"
+                  onChange={(e) => setHolding(h.id, { name: e.target.value })}
+                />
+              </div>
               <input
                 className="field"
                 type="number"
@@ -221,90 +157,85 @@ export default function InputPanel({
                 onChange={(e) => setHolding(h.id, { baseCost: Number(e.target.value) })}
               />
               <button
-                className="btn btn-sm px-0 text-[var(--muted)]"
+                className="btn btn-icon btn-ghost !h-[34px]"
                 title="Kaldır"
                 disabled={cfg.holdings.length <= 1}
                 onClick={() =>
                   onChange({ ...cfg, holdings: cfg.holdings.filter((x) => x.id !== h.id) })
                 }
               >
-                ×
+                <IconTrash />
               </button>
             </div>
           ))}
         </div>
 
-        <div className="flex gap-2 pt-1">
-          <button className="btn btn-sm flex-1" onClick={pullLogos} disabled={logoBusy}>
-            {logoBusy ? "Logolar çekiliyor…" : "Logoları çek"}
-          </button>
-          <button
-            className="btn btn-sm flex-1"
-            onClick={() =>
-              onChange({ ...cfg, holdings: cfg.holdings.map((h) => ({ ...h, logo: undefined })) })
-            }
-          >
-            Logoları temizle
-          </button>
-        </div>
-        {logoMsg && <p className="text-[11px] text-[var(--muted)] leading-relaxed">{logoMsg}</p>}
+        <button
+          className="btn btn-sm w-full"
+          onClick={() => onChange({ ...cfg, holdings: [...cfg.holdings, newHolding()] })}
+        >
+          <IconPlus /> Hisse ekle
+        </button>
 
-        <div className="pt-1">
-          <button
-            className="text-[11px] text-[var(--muted)] hover:text-[var(--text)]"
-            onClick={() => setShowApi((v) => !v)}
-          >
-            {showApi ? "▾" : "▸"} Fiyatları API'den çek
-          </button>
-          {showApi && (
-            <div className="mt-2 space-y-2">
-              <input
-                className="field"
-                value={apiBase}
-                onChange={(e) => onApiBaseChange(e.target.value)}
-                placeholder="http://192.168.8.8:5000"
-              />
-              <button className="btn btn-sm w-full" onClick={pullQuotes} disabled={fetching}>
-                {fetching ? "Çekiliyor…" : "Güncel fiyatları çek"}
-              </button>
-              {apiMsg && <p className="text-[11px] text-[var(--muted)] leading-relaxed">{apiMsg}</p>}
-              <p className="text-[11px] text-[#5c6472] leading-relaxed">
-                {"{base}/api/sorgu/bist/{KOD}"} uç noktasını kullanır. Erişilemezse fiyatları elle
-                girebilirsiniz.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
+        <div className="divider" />
 
-      {/* ---- Varyasyonlar ---- */}
-      <section className="panel p-4 space-y-3">
-        <h2 className="text-sm font-semibold">Lot ve maliyet varyasyonları</h2>
-
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            className="chip text-xs"
-            data-active={paired}
-            onClick={() => set("mode", "paired" as VariantMode)}
-          >
-            <div className="font-semibold">Eşleşmeli</div>
-            <div className="text-[10.5px] text-[var(--muted)] mt-0.5">
-              Lot ve maliyet birlikte ilerler
-            </div>
+        <div className="flex gap-1.5">
+          <button className="btn btn-sm flex-1" onClick={pullLogos} disabled={busy !== ""}>
+            <IconImage /> {busy === "logos" ? "Çekiliyor…" : "Logolar"}
           </button>
-          <button
-            className="chip text-xs"
-            data-active={!paired}
-            onClick={() => set("mode", "cross" as VariantMode)}
-          >
-            <div className="font-semibold">Çapraz</div>
-            <div className="text-[10.5px] text-[var(--muted)] mt-0.5">
-              Tüm lot × maliyet kombinasyonları
-            </div>
+          <button className="btn btn-sm flex-1" onClick={pullQuotes} disabled={busy !== ""}>
+            <IconRefresh /> {busy === "quotes" ? "Çekiliyor…" : "Fiyatlar"}
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        {msg && (
+          <p
+            className="text-[11px] leading-relaxed flex gap-1.5"
+            style={{ color: msg.kind === "ok" ? "var(--ok)" : "var(--warn)" }}
+          >
+            <IconAlert size={13} className="shrink-0 mt-px" />
+            <span>{msg.text}</span>
+          </p>
+        )}
+
+        <details className="group">
+          <summary className="text-[11px] text-[var(--text-3)] cursor-pointer hover:text-[var(--text-2)] list-none">
+            Fiyat API adresi
+          </summary>
+          <input
+            className="field mt-2 !text-[12px]"
+            value={apiBase}
+            onChange={(e) => onApiBaseChange(e.target.value)}
+            placeholder="http://192.168.8.8:5000"
+          />
+          <p className="text-[10.5px] text-[var(--text-3)] mt-1.5 leading-relaxed">
+            {"{base}/api/sorgu/bist/{KOD}"} uç noktası. Logolar Matriks servisinden otomatik
+            gelir, bu adresten bağımsızdır.
+          </p>
+        </details>
+      </Section>
+
+      {/* ------------------------------------------------ varyasyonlar ---- */}
+      <Section
+        title="Lot ve maliyet"
+        icon={<IconSliders />}
+        hint={`${variantCount} pozisyon`}
+      >
+        <div className="seg">
+          <button data-on={paired} onClick={() => set("mode", "paired" as VariantMode)}>
+            Eşleşmeli
+          </button>
+          <button data-on={!paired} onClick={() => set("mode", "cross" as VariantMode)}>
+            Çapraz
+          </button>
+        </div>
+        <p className="text-[10.5px] text-[var(--text-3)] leading-relaxed -mt-1">
+          {paired
+            ? "Lot ve maliyet birlikte ilerler: 100/150 → 150/152,5 → 200/155"
+            : "Tüm lot × maliyet kombinasyonları üretilir."}
+        </p>
+
+        <div className="grid grid-cols-2 gap-2.5">
           <div>
             <label className="lbl">Base lot</label>
             <input
@@ -323,9 +254,6 @@ export default function InputPanel({
               onChange={(e) => set("lotStep", Number(e.target.value))}
             />
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="lbl">Base maliyet</label>
             <input
@@ -337,10 +265,8 @@ export default function InputPanel({
             />
           </div>
           <div>
-            <label className="lbl">
-              Maliyet adım ({cfg.costStepMode === "percent" ? "%" : "tutar"})
-            </label>
-            <div className="flex gap-2">
+            <label className="lbl">Maliyet adım</label>
+            <div className="joined">
               <input
                 className="field"
                 type="number"
@@ -349,8 +275,8 @@ export default function InputPanel({
                 onChange={(e) => set("costStep", Number(e.target.value))}
               />
               <button
-                className="btn btn-sm"
-                title="Adım tipini değiştir"
+                className="unit"
+                title="Adım tipini değiştir (tutar / yüzde)"
                 onClick={() =>
                   set(
                     "costStepMode",
@@ -379,7 +305,7 @@ export default function InputPanel({
             />
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             <div>
               <label className="lbl">Lot adedi</label>
               <input
@@ -403,10 +329,79 @@ export default function InputPanel({
           </div>
         )}
 
-        <p className="text-[11px] text-[var(--muted)]">
-          Toplam <b className="text-[var(--text)]">{variantCount}</b> varyasyon üretilecek.
-        </p>
-      </section>
+        <div className="flex items-center gap-2 pt-0.5">
+          <span className="chip-tag">{variantCount} pozisyon</span>
+          <span className="text-[var(--text-3)]">→</span>
+          <span className="chip-tag" style={{ borderColor: "var(--accent)", color: "var(--text)" }}>
+            {imageCount} görsel
+          </span>
+        </div>
+      </Section>
+
+      {/* ---------------------------------------------------- görünüm ---- */}
+      <Section title="Görsel bilgileri" icon={<IconWallet />} defaultOpen={false}>
+        <div>
+          <label className="lbl">Başlık</label>
+          <input
+            className="field"
+            value={cfg.brand}
+            onChange={(e) => set("brand", e.target.value)}
+            placeholder="Portföyüm"
+          />
+        </div>
+        <div>
+          <label className="lbl">Alt başlık</label>
+          <input
+            className="field"
+            value={cfg.subtitle}
+            onChange={(e) => set("subtitle", e.target.value)}
+            placeholder="(opsiyonel)"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2.5">
+          <div>
+            <label className="lbl">Para birimi</label>
+            <select
+              className="field"
+              value={cfg.currency}
+              onChange={(e) => set("currency", e.target.value as Currency)}
+            >
+              <option value="TRY">TRY ₺</option>
+              <option value="USD">USD $</option>
+              <option value="EUR">EUR €</option>
+            </select>
+          </div>
+          <div>
+            <label className="lbl">Tarih</label>
+            <input
+              type="date"
+              className="field"
+              value={cfg.dateISO.slice(0, 10)}
+              onChange={(e) => set("dateISO", e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="lbl">Nakit bakiye</label>
+            <input
+              className="field"
+              type="number"
+              step="0.01"
+              value={cfg.cashBalance || ""}
+              placeholder="0"
+              onChange={(e) => set("cashBalance", Number(e.target.value))}
+            />
+          </div>
+          <div>
+            <label className="lbl">Hesap no</label>
+            <input
+              className="field"
+              value={cfg.accountNo}
+              placeholder="(opsiyonel)"
+              onChange={(e) => set("accountNo", e.target.value)}
+            />
+          </div>
+        </div>
+      </Section>
     </div>
   );
 }

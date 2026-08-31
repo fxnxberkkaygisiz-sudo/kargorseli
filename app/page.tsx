@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import InputPanel from "@/components/InputPanel";
 import PreviewCard, { type PreviewHandle } from "@/components/PreviewCard";
+import TemplateGallery from "@/components/TemplateGallery";
+import { IconAlert, IconCheck, IconDownload, IconLayers } from "@/components/Icons";
 import type { GeneratorConfig, TemplateMeta } from "@/lib/types";
 import { buildVariants, groupByStep } from "@/lib/variants";
 import { listScope, renderTemplate, variantScope } from "@/lib/template";
@@ -12,7 +14,7 @@ import { DEFAULT_API_BASE } from "@/lib/quotes";
 import { fetchLogoDataUrl } from "@/lib/logos";
 import { slug } from "@/lib/format";
 
-const STORAGE_KEY = "kg-config-v1";
+const STORAGE_KEY = "kg-config-v2";
 
 const DEFAULT_CONFIG: GeneratorConfig = {
   holdings: [
@@ -22,7 +24,7 @@ const DEFAULT_CONFIG: GeneratorConfig = {
   baseLot: 100,
   lotStep: 50,
   lotCount: 4,
-  baseCost: 150.0,
+  baseCost: 150,
   costStep: 2.5,
   costCount: 4,
   costStepMode: "absolute",
@@ -39,41 +41,47 @@ interface Item {
   id: string;
   html: string;
   label: string;
+  sublabel: string;
   filename: string;
 }
+
+/** Sablon yolu mutlak: alt yolda (GitHub Pages) da dogru cozulsun. */
+const BASE = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/+$/, "");
+const templateUrl = (file: string) => `${BASE}/templates/${file}`;
 
 export default function Page() {
   const [cfg, setCfg] = useState<GeneratorConfig>(DEFAULT_CONFIG);
   const [apiBase, setApiBase] = useState(DEFAULT_API_BASE);
   const [templates, setTemplates] = useState<TemplateMeta[]>([]);
-  const [templateId, setTemplateId] = useState<string>("");
-  const [templateHtml, setTemplateHtml] = useState<string>("");
-  const [templateError, setTemplateError] = useState<string>("");
+  const [templateId, setTemplateId] = useState("");
+  const [templateHtml, setTemplateHtml] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [format, setFormat] = useState<ImageFormat>("png");
   const [pixelRatio, setPixelRatio] = useState(2);
-  const [boxWidth, setBoxWidth] = useState(260);
-  const [status, setStatus] = useState("");
-  const [busyId, setBusyId] = useState<string>("");
+  const [boxWidth, setBoxWidth] = useState(250);
+  const [status, setStatus] = useState<{ kind: "ok" | "err" | "busy"; text: string } | null>(null);
+  const [busyId, setBusyId] = useState("");
   const [exporting, setExporting] = useState(false);
 
   const handles = useRef(new Map<string, PreviewHandle>());
-  // Logosu denenmis kodlar - basarisiz olanlari tekrar tekrar istemeyelim.
   const triedLogos = useRef(new Set<string>());
+  const templateCache = useRef(new Map<string, string>());
 
-  /* ---------- kalici ayarlar ---------- */
+  /* ------------------------------------------------ kalici ayarlar ---- */
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
-      const saved = JSON.parse(raw);
-      if (saved.cfg) setCfg({ ...DEFAULT_CONFIG, ...saved.cfg });
-      if (saved.apiBase) setApiBase(saved.apiBase);
-      if (saved.templateId) setTemplateId(saved.templateId);
-      if (saved.format) setFormat(saved.format);
-      if (saved.pixelRatio) setPixelRatio(saved.pixelRatio);
+      const s = JSON.parse(raw);
+      if (s.cfg) setCfg({ ...DEFAULT_CONFIG, ...s.cfg });
+      if (s.apiBase) setApiBase(s.apiBase);
+      if (s.templateId) setTemplateId(s.templateId);
+      if (s.format) setFormat(s.format);
+      if (s.pixelRatio) setPixelRatio(s.pixelRatio);
+      if (s.boxWidth) setBoxWidth(s.boxWidth);
     } catch {
-      /* bozuk kayit varsa varsayilanlarla devam */
+      /* bozuk kayit - varsayilanlarla devam */
     }
   }, []);
 
@@ -82,18 +90,16 @@ export default function Page() {
       try {
         localStorage.setItem(
           STORAGE_KEY,
-          JSON.stringify({ cfg, apiBase, templateId, format, pixelRatio })
+          JSON.stringify({ cfg, apiBase, templateId, format, pixelRatio, boxWidth })
         );
       } catch {
-        /* kota dolu olabilir, kritik degil */
+        /* kota dolu olabilir */
       }
     }, 400);
     return () => window.clearTimeout(id);
-  }, [cfg, apiBase, templateId, format, pixelRatio]);
+  }, [cfg, apiBase, templateId, format, pixelRatio, boxWidth]);
 
-  /* ---------- logolar (otomatik) ---------- */
-  // Kod girilen ama logosu olmayan hisseler icin Matriks logosunu kendiliginden
-  // ceker; kullanicinin ayrica butona basmasi gerekmez.
+  /* ------------------------------------------- logolar (otomatik) ---- */
   useEffect(() => {
     const missing = cfg.holdings.filter(
       (h) => h.code.trim() && !h.logo && !triedLogos.current.has(h.code.trim().toUpperCase())
@@ -127,16 +133,39 @@ export default function Page() {
     };
   }, [cfg.holdings]);
 
-  /* ---------- sablon listesi ---------- */
+  /* -------------------------------------------------- sablon yukle ---- */
+  const loadTemplate = useCallback(async (t: TemplateMeta): Promise<string> => {
+    const hit = templateCache.current.get(t.file);
+    if (hit !== undefined) return hit;
+    const url = templateUrl(t.file);
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
+    const text = await res.text();
+    templateCache.current.set(t.file, text);
+    return text;
+  }, []);
+
   useEffect(() => {
-    fetch("templates/manifest.json", { cache: "no-store" })
-      .then((r) => r.json())
+    const url = `${BASE}/templates/manifest.json`;
+    fetch(url, { cache: "no-store" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((json) => {
         const list: TemplateMeta[] = json.templates ?? [];
         setTemplates(list);
         setTemplateId((cur) => (cur && list.some((t) => t.id === cur) ? cur : list[0]?.id ?? ""));
+        setLoadError("");
       })
-      .catch(() => setTemplateError("templates/manifest.json okunamadı."));
+      .catch((err) => {
+        const isFile = typeof location !== "undefined" && location.protocol === "file:";
+        setLoadError(
+          isFile
+            ? "Sayfa dosya sisteminden (file://) açılmış; tarayıcı bu modda şablonları okuyamaz. Siteyi bir sunucu üzerinden açın (npm run dev veya yayınlanan adres)."
+            : `Şablon listesi okunamadı — ${url} — ${err instanceof Error ? err.message : "bilinmeyen hata"}`
+        );
+      });
   }, []);
 
   const template = useMemo(
@@ -146,29 +175,33 @@ export default function Page() {
 
   useEffect(() => {
     if (!template) return;
-    setTemplateError("");
-    fetch(`templates/${template.file}`, { cache: "no-store" })
-      .then((r) => {
-        if (!r.ok) throw new Error(String(r.status));
-        return r.text();
+    let cancelled = false;
+    loadTemplate(template)
+      .then((html) => {
+        if (cancelled) return;
+        setTemplateHtml(html);
+        setLoadError("");
       })
-      .then(setTemplateHtml)
-      .catch(() => setTemplateError(`${template.file} yüklenemedi.`));
-  }, [template]);
+      .catch((err: Error) => {
+        if (!cancelled) setLoadError(`${template.file} yüklenemedi — ${err.message}`);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [template, loadTemplate]);
 
-  /* ---------- veri -> gorseller ---------- */
+  /* ------------------------------------------------ veri -> gorsel ---- */
   const variants = useMemo(() => buildVariants(cfg), [cfg]);
 
   const items: Item[] = useMemo(() => {
     if (!template || !templateHtml) return [];
 
-    // Portfoy ekranlari: her lot/maliyet adimi icin bir gorsel,
-    // icinde o adimdaki butun hisseler.
     if (template.kind === "list") {
       return groupByStep(variants).map((group, i) => ({
         id: `step-${i}`,
         html: renderTemplate(templateHtml, listScope(group, cfg, i)),
-        label: `Adım ${i + 1} · ${group.length} pozisyon · ${group[0].lot} lot`,
+        label: `Adım ${i + 1}`,
+        sublabel: `${group.length} pozisyon · ${group[0].lot} lot`,
         filename: `${slug(cfg.brand || "portfoy")}-adim${i + 1}-${slug(template.id)}`,
       }));
     }
@@ -176,15 +209,28 @@ export default function Page() {
     return variants.map((v) => ({
       id: v.id,
       html: renderTemplate(templateHtml, variantScope(v, cfg, variants.length)),
-      label: `${v.code} · ${v.lot} lot · ${v.cost.toFixed(2)}`,
+      label: v.code,
+      sublabel: `${v.lot} lot · maliyet ${v.cost.toFixed(2)}`,
       filename: `${slug(v.code)}-${v.lot}lot-${slug(v.cost.toFixed(2))}-${slug(template.id)}`,
     }));
   }, [template, templateHtml, variants, cfg]);
 
-  // secim listesini uretilen gorsellerle senkron tut
   useEffect(() => {
     setSelected(new Set(items.map((i) => i.id)));
   }, [items]);
+
+  /** Galeri kucuk onizlemesi: gercek veriyle doldurulur. */
+  const renderSample = useCallback(
+    (t: TemplateMeta, html: string) => {
+      if (variants.length === 0) return html;
+      if (t.kind === "list") {
+        const group = groupByStep(variants)[0] ?? [];
+        return renderTemplate(html, listScope(group, cfg, 0));
+      }
+      return renderTemplate(html, variantScope(variants[0], cfg, variants.length));
+    },
+    [variants, cfg]
+  );
 
   const toggle = useCallback((id: string) => {
     setSelected((prev) => {
@@ -195,7 +241,7 @@ export default function Page() {
     });
   }, []);
 
-  /* ---------- disari aktarma ---------- */
+  /* ------------------------------------------------ disari aktarma ---- */
   const capture = useCallback(
     async (id: string): Promise<string | null> => {
       const handle = handles.current.get(id);
@@ -214,14 +260,14 @@ export default function Page() {
 
   async function downloadOne(item: Item) {
     setBusyId(item.id);
-    setStatus("");
+    setStatus(null);
     try {
       const dataUrl = await capture(item.id);
       if (!dataUrl) throw new Error("Görsel oluşturulamadı");
       downloadDataUrl(dataUrl, `${item.filename}.${format}`);
-      setStatus(`${item.filename}.${format} indirildi.`);
+      setStatus({ kind: "ok", text: `${item.filename}.${format} indirildi.` });
     } catch (err) {
-      setStatus(err instanceof Error ? `Hata: ${err.message}` : "Bilinmeyen hata");
+      setStatus({ kind: "err", text: err instanceof Error ? err.message : "Bilinmeyen hata" });
     } finally {
       setBusyId("");
     }
@@ -229,13 +275,18 @@ export default function Page() {
 
   async function copyOne(item: Item) {
     setBusyId(item.id);
+    setStatus(null);
     try {
       const dataUrl = await capture(item.id);
       if (!dataUrl) throw new Error("Görsel oluşturulamadı");
       const ok = await copyToClipboard(dataUrl);
-      setStatus(ok ? "Panoya kopyalandı." : "Tarayıcı panoya görsel kopyalamayı desteklemiyor.");
+      setStatus(
+        ok
+          ? { kind: "ok", text: "Panoya kopyalandı." }
+          : { kind: "err", text: "Tarayıcı panoya görsel kopyalamayı desteklemiyor." }
+      );
     } catch (err) {
-      setStatus(err instanceof Error ? `Hata: ${err.message}` : "Bilinmeyen hata");
+      setStatus({ kind: "err", text: err instanceof Error ? err.message : "Bilinmeyen hata" });
     } finally {
       setBusyId("");
     }
@@ -244,29 +295,30 @@ export default function Page() {
   async function downloadSelected() {
     const chosen = items.filter((i) => selected.has(i.id));
     if (chosen.length === 0) {
-      setStatus("Önce en az bir görsel seçin.");
+      setStatus({ kind: "err", text: "Önce en az bir görsel seçin." });
       return;
     }
     setExporting(true);
-    setStatus(`0 / ${chosen.length} hazırlanıyor…`);
     try {
       const entries: Array<{ filename: string; dataUrl: string }> = [];
       for (let i = 0; i < chosen.length; i++) {
-        const item = chosen[i];
-        const dataUrl = await capture(item.id);
-        if (dataUrl) entries.push({ filename: `${item.filename}.${format}`, dataUrl });
-        setStatus(`${i + 1} / ${chosen.length} hazırlanıyor…`);
+        setStatus({ kind: "busy", text: `${i + 1} / ${chosen.length} hazırlanıyor…` });
+        const dataUrl = await capture(chosen[i].id);
+        if (dataUrl) entries.push({ filename: `${chosen[i].filename}.${format}`, dataUrl });
       }
       if (entries.length === 0) throw new Error("Hiçbir görsel oluşturulamadı");
       if (entries.length === 1) {
         downloadDataUrl(entries[0].dataUrl, entries[0].filename);
-        setStatus(`${entries[0].filename} indirildi.`);
+        setStatus({ kind: "ok", text: `${entries[0].filename} indirildi.` });
       } else {
-        await downloadZip(entries, `${slug(cfg.brand || "kar-gorseli")}-${entries.length}-gorsel.zip`);
-        setStatus(`${entries.length} görsel ZIP olarak indirildi.`);
+        await downloadZip(
+          entries,
+          `${slug(cfg.brand || "kar-gorseli")}-${entries.length}-gorsel.zip`
+        );
+        setStatus({ kind: "ok", text: `${entries.length} görsel ZIP olarak indirildi.` });
       }
     } catch (err) {
-      setStatus(err instanceof Error ? `Hata: ${err.message}` : "Bilinmeyen hata");
+      setStatus({ kind: "err", text: err instanceof Error ? err.message : "Bilinmeyen hata" });
     } finally {
       setExporting(false);
     }
@@ -275,146 +327,171 @@ export default function Page() {
   const allSelected = items.length > 0 && selected.size === items.length;
 
   return (
-    <div className="min-h-screen">
-      {/* ---- ust bar ---- */}
-      <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[rgba(11,12,15,.92)] backdrop-blur px-5 py-3 flex items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-[15px] font-semibold leading-tight">Kâr Görseli Üretici</h1>
-          <p className="text-[11px] text-[var(--muted)]">
-            {items.length} görsel · {template?.name ?? "şablon seçilmedi"}
-          </p>
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* ------------------------------------------------------ ust bar ---- */}
+      <header className="h-14 flex-none flex items-center gap-3 px-4 border-b border-[var(--line)] bg-[var(--surface)]">
+        <div className="flex items-center gap-2.5 pr-3 border-r border-[var(--line)]">
+          <span className="w-7 h-7 rounded-lg bg-[var(--accent)] flex items-center justify-center text-white">
+            <IconLayers size={16} />
+          </span>
+          <div className="leading-tight">
+            <div className="text-[13px] font-semibold">Kâr Görseli</div>
+            <div className="text-[10.5px] text-[var(--text-3)]">{templates.length} şablon</div>
+          </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-2 flex-wrap">
+        {template && (
+          <div className="min-w-0 leading-tight">
+            <div className="text-[12.5px] font-semibold truncate">{template.name}</div>
+            <div className="text-[10.5px] text-[var(--text-3)] tabular-nums">
+              {template.width}×{template.height} · {items.length} görsel
+            </div>
+          </div>
+        )}
+
+        <div className="ml-auto flex items-center gap-2">
+          <div className="hidden xl:flex items-center gap-2 pr-2 border-r border-[var(--line)]">
+            <span className="text-[11px] text-[var(--text-3)]">Boyut</span>
+            <input
+              type="range"
+              min={170}
+              max={400}
+              step={10}
+              value={boxWidth}
+              onChange={(e) => setBoxWidth(Number(e.target.value))}
+              className="w-24 accent-[var(--accent)]"
+            />
+          </div>
+
           <select
-            className="field w-auto"
+            className="field !w-auto !h-8"
             value={format}
             onChange={(e) => setFormat(e.target.value as ImageFormat)}
+            title="Dosya biçimi"
           >
             <option value="png">PNG</option>
             <option value="jpeg">JPEG</option>
           </select>
           <select
-            className="field w-auto"
+            className="field !w-auto !h-8"
             value={pixelRatio}
             onChange={(e) => setPixelRatio(Number(e.target.value))}
-            title="Çıktı çözünürlüğü"
+            title="Çözünürlük çarpanı"
           >
             <option value={1}>1x</option>
             <option value={2}>2x</option>
             <option value={3}>3x</option>
           </select>
-          <button className="btn" onClick={() => setSelected(new Set(allSelected ? [] : items.map((i) => i.id)))}>
-            {allSelected ? "Seçimi kaldır" : "Tümünü seç"}
+
+          <button
+            className="btn btn-sm"
+            onClick={() => setSelected(new Set(allSelected ? [] : items.map((i) => i.id)))}
+            disabled={items.length === 0}
+          >
+            <IconCheck size={13} /> {allSelected ? "Bırak" : "Tümü"}
           </button>
-          <button className="btn btn-primary" onClick={downloadSelected} disabled={exporting}>
-            {exporting ? "Hazırlanıyor…" : `Seçilenleri indir (${selected.size})`}
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={downloadSelected}
+            disabled={exporting || items.length === 0}
+          >
+            <IconDownload size={13} />
+            {exporting ? "Hazırlanıyor…" : `İndir (${selected.size})`}
           </button>
         </div>
       </header>
 
-      {status && (
-        <div className="px-5 py-2 text-[12px] text-[var(--muted)] border-b border-[var(--line)] bg-[#0e1014]">
-          {status}
+      {/* -------------------------------------------------- durum satiri ---- */}
+      {(loadError || status) && (
+        <div
+          className="flex-none px-4 py-2 text-[12px] border-b border-[var(--line)] flex items-start gap-2"
+          style={{
+            background:
+              loadError || status?.kind === "err" ? "rgba(240,85,95,.09)" : "var(--surface)",
+            color: loadError || status?.kind === "err" ? "var(--err)" : "var(--text-2)",
+          }}
+        >
+          <IconAlert size={14} className="shrink-0 mt-px" />
+          <span className="leading-relaxed break-all">{loadError || status?.text}</span>
+          {!loadError && (
+            <button
+              className="ml-auto shrink-0 text-[var(--text-3)] hover:text-[var(--text)]"
+              onClick={() => setStatus(null)}
+              aria-label="Kapat"
+            >
+              ✕
+            </button>
+          )}
         </div>
       )}
 
-      <div className="flex items-start gap-5 p-5">
-        {/* ---- sol: form ---- */}
-        <aside className="w-[360px] shrink-0 sticky top-[68px] max-h-[calc(100vh-88px)] overflow-y-auto scroll-thin pr-1">
+      {/* ------------------------------------------------------- govde ---- */}
+      <div className="flex-1 min-h-0 flex">
+        <aside className="w-[330px] flex-none border-r border-[var(--line)] overflow-y-auto scroll-thin p-2.5">
           <InputPanel
             cfg={cfg}
             onChange={setCfg}
             apiBase={apiBase}
             onApiBaseChange={setApiBase}
             variantCount={variants.length}
+            imageCount={items.length}
           />
         </aside>
 
-        {/* ---- sag: sablon + onizleme ---- */}
-        <main className="flex-1 min-w-0 space-y-4">
-          <section className="panel p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold">Şablon</h2>
-              <div className="flex items-center gap-2 text-[11px] text-[var(--muted)]">
-                <span>Önizleme boyutu</span>
-                <input
-                  type="range"
-                  min={180}
-                  max={420}
-                  step={20}
-                  value={boxWidth}
-                  onChange={(e) => setBoxWidth(Number(e.target.value))}
-                  className="accent-[var(--accent)]"
-                />
+        <main className="flex-1 min-w-0 overflow-y-auto scroll-thin p-4">
+          {items.length === 0 ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center max-w-xs">
+                <div className="w-11 h-11 rounded-xl bg-[var(--surface-2)] border border-[var(--line)] flex items-center justify-center mx-auto mb-3 text-[var(--text-3)]">
+                  <IconLayers size={20} />
+                </div>
+                <p className="text-[13px] font-semibold mb-1.5">Henüz görsel yok</p>
+                <p className="text-[12px] text-[var(--text-3)] leading-relaxed">
+                  {loadError
+                    ? "Şablonlar yüklenemediği için önizleme oluşturulamıyor."
+                    : "Soldan hisse kodu ve güncel fiyat girin; görseller burada oluşur."}
+                </p>
               </div>
             </div>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2">
-              {templates.map((t) => (
-                <button
-                  key={t.id}
-                  className="chip"
-                  data-active={t.id === templateId}
-                  onClick={() => setTemplateId(t.id)}
-                >
-                  <div className="text-[12.5px] font-semibold">{t.name}</div>
-                  <div className="text-[10.5px] text-[var(--muted)] mt-1">
-                    {t.width}×{t.height}
-                    {t.kind === "list" ? " · liste" : ""}
-                  </div>
-                </button>
-              ))}
-            </div>
-            {templateError && <p className="text-[12px] text-red-400 mt-3">{templateError}</p>}
-          </section>
-
-          {template && items.length > 0 ? (
-            <div
-              className="grid gap-4"
-              style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${boxWidth + 26}px, 1fr))` }}
-            >
-              {items.map((item) => (
-                <PreviewCard
-                  key={`${template.id}-${item.id}`}
-                  ref={(h) => {
-                    if (h) handles.current.set(item.id, h);
-                    else handles.current.delete(item.id);
-                  }}
-                  html={item.html}
-                  template={template}
-                  boxWidth={boxWidth}
-                  label={item.label}
-                  selected={selected.has(item.id)}
-                  onToggle={() => toggle(item.id)}
-                  busy={busyId === item.id}
-                  actions={
-                    <div className="flex gap-1">
-                      <button
-                        className="btn btn-sm"
-                        onClick={() => copyOne(item)}
-                        disabled={Boolean(busyId)}
-                        title="Panoya kopyala"
-                      >
-                        Kopyala
-                      </button>
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => downloadOne(item)}
-                        disabled={Boolean(busyId)}
-                      >
-                        İndir
-                      </button>
-                    </div>
-                  }
-                />
-              ))}
-            </div>
           ) : (
-            <div className="panel p-10 text-center text-[13px] text-[var(--muted)]">
-              Hisse kodu ve fiyat girdiğinizde görseller burada oluşur.
+            <div
+              className="grid gap-3.5"
+              style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${boxWidth + 28}px, 1fr))` }}
+            >
+              {template &&
+                items.map((item) => (
+                  <PreviewCard
+                    key={`${template.id}-${item.id}`}
+                    ref={(h) => {
+                      if (h) handles.current.set(item.id, h);
+                      else handles.current.delete(item.id);
+                    }}
+                    html={item.html}
+                    template={template}
+                    boxWidth={boxWidth}
+                    label={item.label}
+                    sublabel={item.sublabel}
+                    selected={selected.has(item.id)}
+                    onToggle={() => toggle(item.id)}
+                    onDownload={() => downloadOne(item)}
+                    onCopy={() => copyOne(item)}
+                    busy={busyId === item.id}
+                    disabled={Boolean(busyId) || exporting}
+                  />
+                ))}
             </div>
           )}
         </main>
+
+        <aside className="w-[340px] flex-none border-l border-[var(--line)] bg-[var(--surface)] min-h-0">
+          <TemplateGallery
+            templates={templates}
+            activeId={templateId}
+            onSelect={setTemplateId}
+            loadTemplate={loadTemplate}
+            renderSample={renderSample}
+          />
+        </aside>
       </div>
     </div>
   );
