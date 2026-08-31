@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "sync": "node scripts/sync-templates.mjs"
+    "sync": "node scripts/sync-templates.mjs",
+    "prebuild": "node scripts/sync-templates.mjs"
   },
   "dependencies": {
     "html-to-image": "^1.11.13",

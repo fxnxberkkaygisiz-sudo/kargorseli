@@ -13,6 +13,7 @@ import { downloadDataUrl, downloadZip, copyToClipboard, type ImageFormat } from 
 import { DEFAULT_API_BASE } from "@/lib/quotes";
 import { fetchLogoDataUrl } from "@/lib/logos";
 import { slug } from "@/lib/format";
+import { BUNDLED_HTML, BUNDLED_TEMPLATES } from "@/lib/templates.generated";
 
 const STORAGE_KEY = "kg-config-v2";
 
@@ -56,6 +57,7 @@ export default function Page() {
   const [templateId, setTemplateId] = useState("");
   const [templateHtml, setTemplateHtml] = useState("");
   const [loadError, setLoadError] = useState("");
+  const [usingBundled, setUsingBundled] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [format, setFormat] = useState<ImageFormat>("png");
   const [pixelRatio, setPixelRatio] = useState(2);
@@ -134,37 +136,47 @@ export default function Page() {
   }, [cfg.holdings]);
 
   /* -------------------------------------------------- sablon yukle ---- */
+  // Once fetch denenir (elle eklenen/duzenlenen sablonlar aninda gecerli
+  // olsun diye), basarisiz olursa build sirasinda gomulen kopyaya dusulur.
   const loadTemplate = useCallback(async (t: TemplateMeta): Promise<string> => {
     const hit = templateCache.current.get(t.file);
     if (hit !== undefined) return hit;
-    const url = templateUrl(t.file);
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
-    const text = await res.text();
-    templateCache.current.set(t.file, text);
-    return text;
+
+    try {
+      const res = await fetch(templateUrl(t.file), { cache: "no-store" });
+      if (res.ok) {
+        const text = await res.text();
+        templateCache.current.set(t.file, text);
+        return text;
+      }
+    } catch {
+      /* ag hatasi - gomulu kopyaya dusecegiz */
+    }
+
+    const bundled = BUNDLED_HTML[t.file];
+    if (bundled === undefined) throw new Error(`${t.file} bulunamadı`);
+    templateCache.current.set(t.file, bundled);
+    setUsingBundled(true);
+    return bundled;
   }, []);
 
   useEffect(() => {
-    const url = `${BASE}/templates/manifest.json`;
-    fetch(url, { cache: "no-store" })
+    const apply = (list: TemplateMeta[]) => {
+      setTemplates(list);
+      setTemplateId((cur) => (cur && list.some((t) => t.id === cur) ? cur : list[0]?.id ?? ""));
+    };
+
+    fetch(`${BASE}/templates/manifest.json`, { cache: "no-store" })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
-      .then((json) => {
-        const list: TemplateMeta[] = json.templates ?? [];
-        setTemplates(list);
-        setTemplateId((cur) => (cur && list.some((t) => t.id === cur) ? cur : list[0]?.id ?? ""));
-        setLoadError("");
-      })
-      .catch((err) => {
-        const isFile = typeof location !== "undefined" && location.protocol === "file:";
-        setLoadError(
-          isFile
-            ? "Sayfa dosya sisteminden (file://) açılmış; tarayıcı bu modda şablonları okuyamaz. Siteyi bir sunucu üzerinden açın (npm run dev veya yayınlanan adres)."
-            : `Şablon listesi okunamadı — ${url} — ${err instanceof Error ? err.message : "bilinmeyen hata"}`
-        );
+      .then((json) => apply(json.templates ?? BUNDLED_TEMPLATES))
+      .catch(() => {
+        // Manifest okunamadi: gomulu listeyle devam et. Sablon HTML'leri de
+        // gomulu oldugu icin uygulama tam calisir.
+        apply(BUNDLED_TEMPLATES);
+        setUsingBundled(true);
       });
   }, []);
 
@@ -347,6 +359,15 @@ export default function Page() {
               {template.width}×{template.height} · {items.length} görsel
             </div>
           </div>
+        )}
+
+        {usingBundled && (
+          <span
+            className="chip-tag"
+            title="Şablon dosyaları sunucudan okunamadı; uygulamaya gömülü kopya kullanılıyor. Görseller normal şekilde üretilir."
+          >
+            gömülü şablonlar
+          </span>
         )}
 
         <div className="ml-auto flex items-center gap-2">

@@ -444,3 +444,42 @@ input[type="number"].field::-webkit-inner-spin-button {
 .spin {
   animation: spin 0.7s linear infinite;
 }
+
+/* --------------------------------------------------- hisse satiri ---- */
+
+.holding {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px;
+}
+.holding-logo {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 2px;
+}
+.holding-logo--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-3);
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0;
+}
+.holding-num {
+  display: block;
+}
+.holding-num > span {
+  display: block;
+  font-size: 10px;
+  color: var(--text-3);
+  margin-bottom: 4px;
+  padding-left: 2px;
+}

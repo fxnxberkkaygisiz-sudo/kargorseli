@@ -115,57 +115,66 @@ export default function InputPanel({
         icon={<IconWallet />}
         hint={`${validHoldings} hisse`}
       >
-        <div className="grid grid-cols-[1fr_74px_74px_28px] gap-1.5 px-0.5">
-          <span className="lbl !mb-0">Kod / ad</span>
-          <span className="lbl !mb-0">Fiyat</span>
-          <span className="lbl !mb-0">Maliyet</span>
-          <span />
-        </div>
-
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {cfg.holdings.map((h) => (
-            <div key={h.id} className="grid grid-cols-[1fr_74px_74px_28px] gap-1.5 items-start">
-              <div className="space-y-1.5">
+            <div key={h.id} className="holding">
+              <div className="flex gap-1.5 items-center">
+                {h.logo ? (
+                  <img className="holding-logo" src={h.logo} alt="" />
+                ) : (
+                  <span className="holding-logo holding-logo--empty">
+                    {h.code.trim().charAt(0) || "?"}
+                  </span>
+                )}
                 <input
-                  className="field font-semibold"
+                  className="field !h-8 !w-[76px] font-semibold tracking-wide"
                   value={h.code}
                   placeholder="KOD"
                   onChange={(e) => setHolding(h.id, { code: e.target.value.toUpperCase() })}
                 />
                 <input
-                  className="field !h-[30px] !text-[12px]"
+                  className="field !h-8 flex-1 min-w-0 !text-[12px]"
                   value={h.name}
                   placeholder="Şirket adı"
                   onChange={(e) => setHolding(h.id, { name: e.target.value })}
                 />
+                <button
+                  className="btn btn-icon btn-ghost !h-8"
+                  title="Kaldır"
+                  disabled={cfg.holdings.length <= 1}
+                  onClick={() =>
+                    onChange({ ...cfg, holdings: cfg.holdings.filter((x) => x.id !== h.id) })
+                  }
+                >
+                  <IconTrash />
+                </button>
               </div>
-              <input
-                className="field"
-                type="number"
-                step="0.01"
-                value={h.price || ""}
-                placeholder="Güncel"
-                onChange={(e) => setHolding(h.id, { price: Number(e.target.value) })}
-              />
-              <input
-                className="field"
-                type="number"
-                step="0.01"
-                value={h.baseCost || ""}
-                placeholder="Genel"
-                title="Bu hisseye özel base maliyet. Boş bırakılırsa aşağıdaki genel base maliyet kullanılır."
-                onChange={(e) => setHolding(h.id, { baseCost: Number(e.target.value) })}
-              />
-              <button
-                className="btn btn-icon btn-ghost !h-[34px]"
-                title="Kaldır"
-                disabled={cfg.holdings.length <= 1}
-                onClick={() =>
-                  onChange({ ...cfg, holdings: cfg.holdings.filter((x) => x.id !== h.id) })
-                }
-              >
-                <IconTrash />
-              </button>
+
+              <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                <label className="holding-num">
+                  <span>Güncel fiyat</span>
+                  <input
+                    className="field !h-8"
+                    type="number"
+                    step="0.01"
+                    value={h.price || ""}
+                    placeholder="0,00"
+                    onChange={(e) => setHolding(h.id, { price: Number(e.target.value) })}
+                  />
+                </label>
+                <label className="holding-num">
+                  <span>Base maliyet</span>
+                  <input
+                    className="field !h-8"
+                    type="number"
+                    step="0.01"
+                    value={h.baseCost || ""}
+                    placeholder="genel"
+                    title="Bu hisseye özel base maliyet. Boş bırakılırsa aşağıdaki genel base maliyet kullanılır."
+                    onChange={(e) => setHolding(h.id, { baseCost: Number(e.target.value) })}
+                  />
+                </label>
+              </div>
             </div>
           ))}
         </div>
