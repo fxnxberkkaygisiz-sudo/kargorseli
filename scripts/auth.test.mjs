@@ -13,69 +13,17 @@ process.env.SESSION_SECRET = "test-secret-uzun-dize";
 process.env.ALLOWED_USER_IDS = "777, 888";
 process.env.SESSION_TTL_HOURS = "1";
 
-const {
-  SESSION_COOKIE,
-  authDateFresh,
-  issueSession,
-  readSession,
-  requestFacts,
-  sendLog,
-  verifyTelegramPayload,
-} = await import("../lib/server/auth.ts");
+const { SESSION_COOKIE, issueSession, readSession, requestFacts, sendLog } = await import(
+  "../lib/server/auth.ts"
+);
 const { adminIds, isAdmin, isAllowed, seedIds, storeConfigured } = await import(
   "../lib/server/store.ts"
 );
 
-const BOT_TOKEN = process.env.TG_BOT_TOKEN;
-const enc = new TextEncoder();
-
-/** Telegram'in urettigi imzanin aynisini uretir. */
-async function sign(data, token = BOT_TOKEN) {
-  const checkString = Object.keys(data)
-    .sort()
-    .map((k) => `${k}=${data[k]}`)
-    .join("\n");
-  const secret = await crypto.subtle.digest("SHA-256", enc.encode(token));
-  const key = await crypto.subtle.importKey("raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(checkString));
-  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-const payload = async (id, token) => {
-  const data = { id, first_name: "Ada", username: "ada", auth_date: Math.floor(Date.now() / 1000) };
-  return { ...data, hash: await sign(data, token) };
-};
-
 const results = [];
 const check = (name, cond, extra = "") => results.push({ name, ok: Boolean(cond), extra });
 
-/* --------------------------------------------------------- imza dogrulama -- */
-
 check("cerez adi sabit", SESSION_COOKIE === "kg_session", SESSION_COOKIE);
-
-{
-  const good = await payload(777);
-  check("gecerli imza kabul", await verifyTelegramPayload(good, BOT_TOKEN));
-
-  const tampered = { ...good, hash: good.hash.replace(/^./, (c) => (c === "a" ? "b" : "a")) };
-  check("kurcalanmis hash reddedildi", !(await verifyTelegramPayload(tampered, BOT_TOKEN)));
-
-  // Alan degistirilirse imza tutmaz - baskasinin adina giris yapilamasin.
-  const renamed = { ...good, id: 999 };
-  check("id degistirilirse reddedildi", !(await verifyTelegramPayload(renamed, BOT_TOKEN)));
-
-  const otherBot = await payload(777, "999:BASKA-TOKEN");
-  check("baska bot token'i reddedildi", !(await verifyTelegramPayload(otherBot, BOT_TOKEN)));
-
-  check("hash alani yoksa reddedildi", !(await verifyTelegramPayload({ id: 1 }, BOT_TOKEN)));
-}
-
-/* ------------------------------------------------------------- auth_date --- */
-
-const now = Math.floor(Date.now() / 1000);
-check("taze auth_date", authDateFresh(now));
-check("24 saatten eski auth_date reddedildi", !authDateFresh(now - 90000));
-check("gelecekteki auth_date reddedildi", !authDateFresh(now + 600));
 
 /* ---------------------------------------------------------- beyaz liste ---- */
 

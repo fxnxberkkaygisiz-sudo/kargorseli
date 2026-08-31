@@ -1,9 +1,9 @@
 /**
  * Telegram girisi - istemci tarafi.
  *
- * Dogrulama tarayicida yapilamaz (bot token gerekiyor), o yuzden widget'in
- * dondurdugu veri `/api/auth/telegram` ucuna gonderilir; sunucu imzayi
- * dogrulayip oturum cerezini yazar.
+ * Giris bot uzerinden yapiliyor: sunucudan tek kullanimlik bir anahtar
+ * alinir, kullanici t.me baglantisini Telegram uygulamasinda acip Baslat'a
+ * basar, tarayici da anahtari yoklayarak oturumu alir.
  *
  * Token'i burada hic tutmuyoruz: cerez httpOnly, yani bu dosyadaki (ya da
  * bir XSS'in enjekte ettigi) JS onu okuyamaz. Ayni origin oldugu icin
@@ -18,18 +18,7 @@ export interface SessionUser {
   exp: number;
 }
 
-/** Telegram Login Widget'inin onauth ile verdigi ham nesne. */
-export interface TelegramAuthData {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number;
-  hash: string;
-}
-
-export const TG_BOT = (process.env.NEXT_PUBLIC_TG_BOT ?? "").replace(/^@/, "");
+const TG_BOT = (process.env.NEXT_PUBLIC_TG_BOT ?? "").replace(/^@/, "");
 
 /** Alt yolda yayinlanirsa API de o yolun altinda kalir. */
 const BASE = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/+$/, "");
@@ -37,37 +26,9 @@ const api = (path: string) => `${BASE}/api${path}`;
 
 /**
  * Bot kullanici adi tanimli degilse giris kapisi devreye girmez ve uygulama
- * eskisi gibi acik calisir. Yerel gelistirmede durum budur - widget zaten
- * localhost'ta calismaz, BotFather'a kayitli alan adini ister.
+ * eskisi gibi acik calisir. Yerel gelistirmede varsayilan budur.
  */
 export const authEnabled = Boolean(TG_BOT);
-
-export interface LoginResult {
-  ok: boolean;
-  user?: SessionUser;
-  error?: string;
-  /** Yetkisiz hesapta sunucu kendi id'nizi doner; beyaz listeye eklemek icin. */
-  userId?: string;
-}
-
-export async function loginWithTelegram(data: TelegramAuthData): Promise<LoginResult> {
-  try {
-    const res = await fetch(api("/auth/telegram"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      return { ok: false, error: json?.error || `HTTP ${res.status}`, userId: json?.userId };
-    }
-    return { ok: true, user: json.user };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Baglanti hatasi";
-    return { ok: false, error: `Sunucuya ulasilamadi - ${message}` };
-  }
-}
 
 /* ------------------------------------------------- bot ile giris ------ */
 
@@ -78,13 +39,10 @@ export interface LinkStart {
 }
 
 /**
- * Widget yerine bot uzerinden giris. Tek kullanimlik bir anahtar alinir,
- * kullanici baglantiyi Telegram'da acip Baslat'a basar, sonra claimLink
- * yoklamasi oturumu getirir.
+ * Girisi baslatir: tek kullanimlik anahtar + t.me baglantisi.
  *
- * Bu yol BotFather'daki alan adi kaydina bagli degil: widget'in
- * "Bot domain invalid" dedigi her yerde (preview adresleri, localhost)
- * calisir.
+ * Bu yol BotFather'daki alan adi kaydina bagli degil, yani preview
+ * adreslerinde ve localhost'ta da calisir.
  */
 export async function startLinkLogin(): Promise<{ ok: boolean; data?: LinkStart; error?: string }> {
   try {
@@ -101,6 +59,7 @@ export async function startLinkLogin(): Promise<{ ok: boolean; data?: LinkStart;
 export type ClaimState =
   | { state: "pending" }
   | { state: "ok"; user: SessionUser }
+  /** Yetkisiz hesap - userId beyaz listeye eklemek icin geri veriliyor. */
   | { state: "denied"; error: string; userId?: string }
   | { state: "expired"; error: string };
 

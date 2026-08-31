@@ -1,23 +1,12 @@
 // Tek sunucuda iki taklit:
 //   /bot<token>/<method>  -> Telegram Bot API (mesajlari konsola basar)
 //   /kv                   -> Upstash Redis REST (bellekte hash)
-//   /_sign?id=            -> gecerli imzali giris payload'i uretir
 //   /_calls /_dump /_reset -> gonderilen cagrilar, depo icerigi, sifirlama
 import { createServer } from "node:http";
 
-const BOT_TOKEN = "123456:TEST-TOKEN";
-const enc = new TextEncoder();
 const hashes = new Map(); // key -> Map(field -> value)
 const strings = new Map(); // key -> value (TTL onemsenmiyor)
 const sentCalls = [];
-
-async function sign(data) {
-  const s = Object.keys(data).sort().map((k) => `${k}=${data[k]}`).join("\n");
-  const secret = await crypto.subtle.digest("SHA-256", enc.encode(BOT_TOKEN));
-  const key = await crypto.subtle.importKey("raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(s));
-  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 function redis(args) {
   const [cmd, key, ...rest] = args;
@@ -57,17 +46,6 @@ createServer(async (req, res) => {
     res.writeHead(status, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
     res.end(JSON.stringify(data));
   };
-
-  if (req.url.startsWith("/_sign")) {
-    const u = new URL(`http://x${req.url}`);
-    const data = {
-      id: Number(u.searchParams.get("id") || 777),
-      first_name: u.searchParams.get("ad") || "Test",
-      username: u.searchParams.get("kullanici") || "testuser",
-      auth_date: Math.floor(Date.now() / 1000),
-    };
-    return json({ ...data, hash: await sign(data) });
-  }
 
   if (req.url.startsWith("/_calls")) return json(sentCalls);
   if (req.url.startsWith("/_reset")) {

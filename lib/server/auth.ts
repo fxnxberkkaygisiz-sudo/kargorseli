@@ -2,8 +2,7 @@
  * Telegram girisi ve kanal loglari - sunucu tarafi.
  *
  * Bu dosya yalniz route handler'lardan cagrilir; icindeki hicbir sey
- * istemciye gitmez. Bot token'i burada okunur - dogrulama HMAC gerektiriyor
- * ve token tarayiciya konulamaz.
+ * istemciye gitmez. Bot token'i burada okunur ve tarayiciya asla gitmez.
  *
  * Oturum imzali bir cerezde tasinir: httpOnly oldugu icin sayfadaki JS
  * (ve dolayisiyla bir XSS) okuyamaz. Site ile API ayni origin'de oldugu
@@ -28,34 +27,11 @@ export interface SessionPayload {
   exp: number;
 }
 
-export interface TelegramPayload {
-  id: number | string;
-  first_name?: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number | string;
-  hash: string;
-  [key: string]: unknown;
-}
-
 export interface Actor {
   id: string;
   username: string;
   name: string;
 }
-
-/** Telegram'in verdigi ham nesneden ad/kullanici adini toparlar. */
-export const actorFromTelegram = (u: {
-  id: number | string;
-  first_name?: string;
-  last_name?: string;
-  username?: string;
-}): Actor => ({
-  id: String(u.id),
-  username: u.username || "",
-  name: [u.first_name, u.last_name].filter(Boolean).join(" ").trim(),
-});
 
 /* --------------------------------------------------------------- ayarlar -- */
 
@@ -81,9 +57,6 @@ const b64urlDecode = (str: string) => {
   return out;
 };
 
-const hex = (buf: ArrayBuffer) =>
-  [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-
 /** Uzunluk sizdirmayan karsilastirma. */
 function safeEqual(a: string, b: string): boolean {
   if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
@@ -100,37 +73,6 @@ const hmacKey = (secret: string | ArrayBuffer) =>
     false,
     ["sign"]
   );
-
-/* ------------------------------------------------------ telegram dogrulama -- */
-
-/**
- * https://core.telegram.org/widgets/login#checking-authorization
- * secret_key = SHA256(bot_token); hash = HMAC_SHA256(data_check_string, secret_key)
- */
-export async function verifyTelegramPayload(
-  data: Record<string, unknown>,
-  botToken: string
-): Promise<boolean> {
-  const { hash, ...rest } = data;
-  if (typeof hash !== "string" || !/^[0-9a-f]{64}$/.test(hash)) return false;
-
-  const checkString = Object.keys(rest)
-    .filter((k) => rest[k] !== undefined && rest[k] !== null)
-    .sort()
-    .map((k) => `${k}=${rest[k]}`)
-    .join("\n");
-
-  const secret = await crypto.subtle.digest("SHA-256", enc.encode(botToken));
-  const key = await hmacKey(secret);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(checkString));
-  return safeEqual(hex(sig), hash);
-}
-
-/** Yakalanan bir giris verisi tekrar oynatilamasin. */
-export function authDateFresh(authDate: number | string): boolean {
-  const age = Math.floor(Date.now() / 1000) - Number(authDate || 0);
-  return Number.isFinite(age) && age <= 86400 && age >= -300;
-}
 
 /* --------------------------------------------------------------- oturum ---- */
 
@@ -185,7 +127,6 @@ const escapeHtml = (s: unknown) =>
 const EVENT_LABEL: Record<string, [string, string]> = {
   login: ["OK", "Giris"],
   login_denied: ["RED", "Giris reddedildi (listede yok)"],
-  login_invalid: ["!!!", "Gecersiz imza"],
   logout: ["--", "Cikis"],
   open: ["**", "Uygulama acildi"],
   download: ["DL", "Gorsel indirildi"],

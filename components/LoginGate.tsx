@@ -10,15 +10,12 @@ import {
   type ReactNode,
 } from "react";
 import {
-  TG_BOT,
   authEnabled,
   claimLink,
   fetchSession,
-  loginWithTelegram,
   logout as endSession,
   startLinkLogin,
   type SessionUser,
-  type TelegramAuthData,
 } from "@/lib/auth";
 import { IconAlert, IconLayers, IconRefresh } from "@/components/Icons";
 
@@ -31,63 +28,6 @@ const SessionContext = createContext<SessionValue>({ user: null, signOut: async 
 
 /** Oturum bilgisi - giris kapali ise user null doner. */
 export const useSession = () => useContext(SessionContext);
-
-declare global {
-  interface Window {
-    __kgTelegramAuth?: (user: TelegramAuthData) => void;
-  }
-}
-
-/**
- * Telegram Login Widget'i bir <script> etiketi olarak eklenir ve kendi
- * yerine bir iframe cizer; React ile dogrudan render edilemez. Geri cagri
- * global bir fonksiyon uzerinden geldigi icin window'a bagliyoruz.
- *
- * Widget yalniz BotFather'da `/setdomain` ile kayitli alan adinda calisir;
- * baska yerlerde "Bot domain invalid" der. Alttaki bot baglantisi yolu o
- * durumda da calisiyor.
- */
-function TelegramButton({ onAuth }: { onAuth: (user: TelegramAuthData) => void }) {
-  const host = useRef<HTMLDivElement>(null);
-  const latest = useRef(onAuth);
-  latest.current = onAuth;
-
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const node = host.current;
-    if (!node) return;
-
-    window.__kgTelegramAuth = (user) => latest.current(user);
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = "https://telegram.org/js/telegram-widget.js?22";
-    script.setAttribute("data-telegram-login", TG_BOT);
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-radius", "8");
-    script.setAttribute("data-userpic", "false");
-    script.setAttribute("data-onauth", "__kgTelegramAuth(user)");
-    script.onerror = () => setFailed(true);
-    node.appendChild(script);
-
-    return () => {
-      node.innerHTML = "";
-      delete window.__kgTelegramAuth;
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={host} className="min-h-[46px] flex items-center justify-center" />
-      {failed && (
-        <p className="text-[11.5px] text-[var(--text-3)] text-center leading-relaxed">
-          Widget yüklenemedi — aşağıdaki yoldan girebilirsiniz.
-        </p>
-      )}
-    </>
-  );
-}
 
 /** Yoklama araligi ve toplam bekleme suresi (sunucudaki anahtar 5 dk yasiyor). */
 const POLL_MS = 2000;
@@ -133,28 +73,6 @@ export default function LoginGate({ children }: { children: ReactNode }) {
     setUser(found);
     setPhase("in");
   }, []);
-
-  /* ------------------------------------------------------ widget yolu -- */
-  const handleAuth = useCallback(
-    async (data: TelegramAuthData) => {
-      stopPolling();
-      setWaiting(null);
-      setBusy(true);
-      setError("");
-      setDeniedId("");
-
-      const result = await loginWithTelegram(data);
-      setBusy(false);
-
-      if (!result.ok) {
-        setError(result.error || "Giris yapilamadi.");
-        if (result.userId) setDeniedId(result.userId);
-        return;
-      }
-      enter(result.user ?? null);
-    },
-    [enter, stopPolling]
-  );
 
   /* ------------------------------------------------ bot baglantisi ---- */
   const startBotLogin = useCallback(async () => {
@@ -235,8 +153,8 @@ export default function LoginGate({ children }: { children: ReactNode }) {
           </div>
 
           <p className="text-[12px] text-[var(--text-2)] leading-relaxed">
-            Bu araç yalnızca yetkili Telegram hesaplarına açık. Aşağıdaki yollardan biriyle
-            giriş yapın; her giriş kayıt kanalına düşer.
+            Bu araç yalnızca yetkili Telegram hesaplarına açık. Aşağıdaki düğme Telegram
+            uygulamasını açar; her giriş kayıt kanalına düşer.
           </p>
 
           {waiting ? (
@@ -268,20 +186,11 @@ export default function LoginGate({ children }: { children: ReactNode }) {
             </div>
           ) : (
             <>
-              <TelegramButton onAuth={handleAuth} />
-
-              <div className="flex items-center gap-2.5">
-                <span className="flex-1 h-px bg-[var(--line)]" />
-                <span className="text-[10.5px] text-[var(--text-3)]">ya da</span>
-                <span className="flex-1 h-px bg-[var(--line)]" />
-              </div>
-
               <button className="btn btn-primary w-full" onClick={startBotLogin}>
-                Telegram uygulamasıyla gir
+                Telegram ile giriş yap
               </button>
               <p className="text-[11px] text-[var(--text-3)] leading-relaxed -mt-1.5">
-                Bot sohbeti açılır, <b>Başlat</b>&apos;a basarsınız. Üstteki düğme
-                &quot;Bot domain invalid&quot; derse bu yol her yerde çalışır.
+                Bot sohbeti açılır, <b>Başlat</b>&apos;a basarsınız, bu sekmeye dönersiniz.
               </p>
             </>
           )}
