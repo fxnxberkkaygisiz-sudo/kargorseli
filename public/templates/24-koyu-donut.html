@@ -1,0 +1,102 @@
+<style>
+  .t24 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#090A0D;
+    color:#E7EBF1; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t24 * { box-sizing:border-box; }
+  .t24-sb { height:50px; padding:0 24px 0 30px; display:flex; align-items:center;
+    justify-content:space-between; font-size:15px; font-weight:600; color:#fff; }
+  .t24-sbr { display:flex; align-items:center; gap:6px; }
+  .t24-nav { height:54px; padding:0 20px; display:flex; align-items:center;
+    justify-content:space-between; border-bottom:1px solid #15181E; }
+  .t24-nt { font-size:18px; font-weight:700; }
+  .t24-don { padding:26px 0 8px; text-align:center; }
+  .t24-kp { display:flex; gap:10px; padding:14px 20px 0; }
+  .t24-k { flex:1; background:#101318; border:1px solid #1A1E25; border-radius:13px; padding:14px 15px; }
+  .t24-kk { font-size:11px; color:#79818E; }
+  .t24-kv { font-size:16px; font-weight:700; margin-top:5px; font-variant-numeric:tabular-nums; }
+  .t24-h { padding:22px 20px 10px; font-size:11.5px; letter-spacing:1.4px;
+    text-transform:uppercase; color:#79818E; }
+  .t24-card { margin:0 20px; background:#101318; border:1px solid #1A1E25; border-radius:16px;
+    padding:0 16px; }
+  .t24-row { display:flex; align-items:center; padding:14px 0; border-bottom:1px solid #191D24; }
+  .t24-row:last-child { border-bottom:0; }
+  .t24-img { width:36px; height:36px; border-radius:10px; object-fit:contain; background:#fff;
+    padding:3px; margin-right:12px; flex:none; }
+  .t24-av { width:36px; height:36px; border-radius:10px; margin-right:12px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; }
+  .t24-c { font-size:15px; font-weight:650; }
+  .t24-n { font-size:11.5px; color:#79818E; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t24-v { margin-left:auto; text-align:right; }
+  .t24-a { font-size:15px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t24-p { font-size:12.5px; font-weight:650; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t24-tot { margin:auto 20px 0; background:{{trendColorSoft}}; border:1px solid {{trendBorder}};
+    border-radius:16px; padding:18px; display:flex; align-items:center; justify-content:space-between; }
+  .t24-tk { font-size:13px; color:#9AA2AE; }
+  .t24-tv { font-size:25px; font-weight:750; letter-spacing:-.7px; margin-top:4px;
+    color:{{trendColorDark}}; font-variant-numeric:tabular-nums; }
+  .t24-tp { font-size:19px; font-weight:700; color:{{trendColorDark}}; }
+  .t24-ft { padding:16px 20px; display:flex; justify-content:space-between;
+    font-size:11px; color:#5A626E; }
+  .t24-home { width:140px; height:5px; border-radius:3px; background:#3A3E46; margin:0 auto 8px; }
+</style>
+
+<div class="t24">
+  <div class="t24-sb"><span>{{time}}</span><span class="t24-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#fff"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#fff" stroke-opacity=".45"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t24-nav">
+    <div style="display:flex;align-items:center;gap:14px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E7EBF1" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+      <div class="t24-nt">Dağılım</div>
+    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#79818E" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/></svg>
+  </div>
+
+  <div class="t24-don">
+    <svg width="210" height="210" viewBox="0 0 120 120">
+      {{#rows}}
+      <circle cx="60" cy="60" r="45" fill="none" stroke="{{rowColor}}" stroke-width="15"
+        pathLength="100" stroke-dasharray="{{donutDash}}" stroke-dashoffset="{{donutOffset}}"
+        transform="rotate(-90 60 60)"/>
+      {{/rows}}
+      <text x="60" y="55" text-anchor="middle" font-size="14" font-weight="700" fill="#E7EBF1"
+        font-family="-apple-system, Segoe UI, Roboto, sans-serif">%{{topShare}}</text>
+      <text x="60" y="70" text-anchor="middle" font-size="10" fill="#79818E"
+        font-family="-apple-system, Segoe UI, Roboto, sans-serif">{{topCode}}</text>
+    </svg>
+  </div>
+
+  <div class="t24-kp">
+    <div class="t24-k"><div class="t24-kk">Maliyet</div><div class="t24-kv">{{investmentNum}}</div></div>
+    <div class="t24-k"><div class="t24-kk">Güncel değer</div><div class="t24-kv">{{valueNum}}</div></div>
+  </div>
+
+  <div class="t24-h">Pozisyonlar · {{rowCount}}</div>
+  <div class="t24-card">
+    {{#rows}}
+    <div class="t24-row">
+      {{#hasLogo}}<img class="t24-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+      {{^hasLogo}}<div class="t24-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+      <div>
+        <div class="t24-c">{{code}}</div>
+        <div class="t24-n">{{lot}} adet · %{{share}} pay</div>
+      </div>
+      <div class="t24-v">
+        <div class="t24-a">{{symbol}}{{valueNum}}</div>
+        <div class="t24-p" style="color:{{trendColorDark}}">{{pnl}}</div>
+      </div>
+    </div>
+    {{/rows}}
+  </div>
+
+  <div class="t24-tot">
+    <div><div class="t24-tk">Toplam kâr / zarar</div><div class="t24-tv">{{pnl}}</div></div>
+    <div class="t24-tp">{{pnlPercent}}</div>
+  </div>
+
+  <div class="t24-ft"><span>{{datetime}}</span><span>{{txId}}</span></div>
+  <div class="t24-home"></div>
+</div>

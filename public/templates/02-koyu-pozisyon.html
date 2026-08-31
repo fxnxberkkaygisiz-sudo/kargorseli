@@ -1,0 +1,103 @@
+<style>
+  .t02 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#0A0B0D;
+    color:#fff; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t02 * { box-sizing:border-box; }
+  .t02-sb { height:50px; padding:0 24px 0 30px; display:flex; align-items:center;
+    justify-content:space-between; font-size:15px; font-weight:600; }
+  .t02-sbr { display:flex; align-items:center; gap:6px; }
+  .t02-nav { height:52px; padding:0 18px; display:flex; align-items:center; gap:14px;
+    border-bottom:1px solid #16181D; }
+  .t02-nt { font-size:17px; font-weight:650; }
+  .t02-ns { font-size:11.5px; color:#7E8590; margin-top:1px; }
+  .t02-px { padding:24px 22px 0; }
+  .t02-plbl { font-size:13px; color:#7E8590; }
+  .t02-pv { font-size:38px; font-weight:700; letter-spacing:-1.2px; margin-top:6px;
+    font-variant-numeric:tabular-nums; }
+  .t02-pc { font-size:14.5px; font-weight:600; margin-top:6px; color:{{trendColorDark}}; }
+  .t02-ch { padding:14px 12px 0; }
+  .t02-rng { display:flex; gap:6px; padding:6px 22px 0; }
+  .t02-rg { flex:1; text-align:center; font-size:12.5px; font-weight:600; color:#7E8590;
+    padding:7px 0; border-radius:8px; }
+  .t02-rg.on { background:#1A1D24; color:#fff; }
+  .t02-card { margin:22px 18px 0; background:#111318; border-radius:16px; padding:4px 18px; }
+  .t02-ct { font-size:13px; color:#7E8590; padding:16px 0 4px; letter-spacing:.3px; }
+  .t02-r { display:flex; justify-content:space-between; align-items:center; padding:14px 0;
+    border-bottom:1px solid #1B1E25; }
+  .t02-r:last-child { border-bottom:0; }
+  .t02-k { font-size:14.5px; color:#9AA1AC; }
+  .t02-v { font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .t02-hl { margin:20px 18px 0; background:{{trendColorSoft}}; border:1px solid {{trendBorder}};
+    border-radius:16px; padding:18px; display:flex; align-items:center; justify-content:space-between; }
+  .t02-hk { font-size:13.5px; color:#9AA1AC; }
+  .t02-hv { font-size:26px; font-weight:750; letter-spacing:-.8px; margin-top:4px;
+    color:{{trendColorDark}}; font-variant-numeric:tabular-nums; }
+  .t02-hp { font-size:20px; font-weight:700; color:{{trendColorDark}}; }
+  .t02-btns { margin-top:auto; padding:0 18px 14px; display:flex; gap:11px; }
+  .t02-b { flex:1; height:52px; border-radius:14px; display:flex; align-items:center;
+    justify-content:center; font-size:16px; font-weight:700; }
+  .t02-buy { background:#2563EB; }
+  .t02-sell { background:#1A1D24; color:#E5E7EB; }
+  .t02-home { width:140px; height:5px; border-radius:3px; background:#3A3E46; margin:0 auto 8px; }
+</style>
+
+<div class="t02">
+  <div class="t02-sb"><span>{{time}}</span><span class="t02-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#fff"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#fff" stroke-opacity=".45"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t02-nav">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+    <div>
+      <div class="t02-nt">{{code}}</div>
+      <div class="t02-ns">{{shortName}}</div>
+    </div>
+    <svg style="margin-left:auto" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#7E8590" stroke-width="1.8"><path d="m12 3.5 2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 10l6.1-.9z"/></svg>
+  </div>
+
+  <div class="t02-px">
+    <div class="t02-plbl">Güncel fiyat</div>
+    <div class="t02-pv">{{symbol}}{{price}}</div>
+    <div class="t02-pc">{{pnlPercent}} · maliyete göre</div>
+  </div>
+
+  <div class="t02-ch">
+    <svg viewBox="0 0 200 60" width="100%" height="150" preserveAspectRatio="none">
+      <defs><linearGradient id="g02" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="{{trendColorDark}}" stop-opacity=".26"/>
+        <stop offset="100%" stop-color="{{trendColorDark}}" stop-opacity="0"/></linearGradient></defs>
+      <path d="{{sparkArea}}" fill="url(#g02)"/>
+      <path d="{{sparkPath}}" fill="none" stroke="{{trendColorDark}}" stroke-width="1.8"
+        stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    </svg>
+  </div>
+
+  <div class="t02-rng">
+    <div class="t02-rg">1G</div><div class="t02-rg">1H</div><div class="t02-rg">1A</div>
+    <div class="t02-rg on">Tümü</div>
+  </div>
+
+  <div class="t02-card">
+    <div class="t02-ct">Pozisyonum</div>
+    <div class="t02-r"><span class="t02-k">Adet</span><span class="t02-v">{{lot}}</span></div>
+    <div class="t02-r"><span class="t02-k">Ortalama maliyet</span><span class="t02-v">{{symbol}}{{cost}}</span></div>
+    <div class="t02-r"><span class="t02-k">Maliyet tutarı</span><span class="t02-v">{{symbol}}{{investmentNum}}</span></div>
+    <div class="t02-r"><span class="t02-k">Güncel değer</span><span class="t02-v">{{symbol}}{{valueNum}}</span></div>
+  </div>
+
+  <div class="t02-hl">
+    <div>
+      <div class="t02-hk">Toplam kâr / zarar</div>
+      <div class="t02-hv">{{pnl}}</div>
+    </div>
+    <div class="t02-hp">{{pnlPercent}}</div>
+  </div>
+
+  <div class="t02-btns">
+    <div class="t02-b t02-sell">Sat</div>
+    <div class="t02-b t02-buy">Al</div>
+  </div>
+  <div class="t02-home"></div>
+</div>

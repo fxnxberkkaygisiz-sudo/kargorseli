@@ -1,0 +1,229 @@
+{
+  "templates": [
+    {
+      "id": "01-koyu-hesap",
+      "name": "Koyu · Yatırım Hesabı",
+      "file": "01-koyu-hesap.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Koyu tema hesap ekranı, bakiye + pozisyon listesi"
+    },
+    {
+      "id": "02-koyu-pozisyon",
+      "name": "Koyu · Pozisyon Detayı",
+      "file": "02-koyu-pozisyon.html",
+      "kind": "single",
+      "width": 430,
+      "height": 932,
+      "description": "Tek hisse detay ekranı, grafik + Al/Sat"
+    },
+    {
+      "id": "03-koyu-liste",
+      "name": "Koyu · Portföy Tablosu",
+      "file": "03-koyu-liste.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Yoğun tablo, K/Z rozetli"
+    },
+    {
+      "id": "04-koyu-kart",
+      "name": "Koyu · Pozisyon Kartı",
+      "file": "04-koyu-kart.html",
+      "kind": "single",
+      "width": 760,
+      "height": 420,
+      "description": "Telefon iskeleti olmayan yatay kart"
+    },
+    {
+      "id": "05-mavi-hero",
+      "name": "Açık · Mavi Hero",
+      "file": "05-mavi-hero.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Açık tema, mavi toplam varlık kartı"
+    },
+    {
+      "id": "06-acik-pozisyon",
+      "name": "Açık · Pozisyon Detayı",
+      "file": "06-acik-pozisyon.html",
+      "kind": "single",
+      "width": 430,
+      "height": 932,
+      "description": "Beyaz tema tek hisse detayı"
+    },
+    {
+      "id": "07-acik-kart",
+      "name": "Açık · Pozisyon Kartı",
+      "file": "07-acik-kart.html",
+      "kind": "single",
+      "width": 760,
+      "height": 420,
+      "description": "Beyaz yatay kart"
+    },
+    {
+      "id": "08-bant-yesil",
+      "name": "Bant · Yeşil",
+      "file": "08-bant-yesil.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Renkli üst bant + özet satırları"
+    },
+    {
+      "id": "09-bant-lacivert",
+      "name": "Bant · Lacivert",
+      "file": "09-bant-lacivert.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Renkli üst bant, lacivert"
+    },
+    {
+      "id": "10-bant-bordo",
+      "name": "Bant · Bordo",
+      "file": "10-bant-bordo.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Renkli üst bant, bordo"
+    },
+    {
+      "id": "11-bant-ozet",
+      "name": "Bant · Geniş Özet",
+      "file": "11-bant-ozet.html",
+      "kind": "list",
+      "width": 780,
+      "height": 340,
+      "description": "Sadece özet bandı, yatay"
+    },
+    {
+      "id": "12-tablo-rozet",
+      "name": "Tablo · Renkli Rozet",
+      "file": "12-tablo-rozet.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Beyaz tablo, dolu K/Z rozetleri"
+    },
+    {
+      "id": "13-tablo-genis",
+      "name": "Masaüstü · Geniş Tablo",
+      "file": "13-tablo-genis.html",
+      "kind": "list",
+      "width": 1000,
+      "height": "auto",
+      "description": "Geniş masaüstü tablosu"
+    },
+    {
+      "id": "14-donut-bloklar",
+      "name": "Donut · Pozisyon Blokları",
+      "file": "14-donut-bloklar.html",
+      "kind": "list",
+      "width": 430,
+      "height": "auto",
+      "description": "Dağılım donutu + Al/Sat blokları"
+    },
+    {
+      "id": "15-donut-ozet",
+      "name": "Donut · Yatay Özet",
+      "file": "15-donut-ozet.html",
+      "kind": "list",
+      "width": 820,
+      "height": 480,
+      "description": "Donut + tablo, yatay kart"
+    },
+    {
+      "id": "16-dagilim-bar",
+      "name": "Dağılım · Çubuk",
+      "file": "16-dagilim-bar.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Dağılım çubuğu + pozisyon listesi"
+    },
+    {
+      "id": "17-islem-ozeti",
+      "name": "Pozisyon Özeti",
+      "file": "17-islem-ozeti.html",
+      "kind": "single",
+      "width": 430,
+      "height": 932,
+      "description": "Onay ekranı görünümü"
+    },
+    {
+      "id": "18-satir-serit",
+      "name": "Şerit · Tek Satır",
+      "file": "18-satir-serit.html",
+      "kind": "single",
+      "width": 780,
+      "height": 230,
+      "description": "Dar yatay şerit"
+    },
+    {
+      "id": "19-hesap-ozeti",
+      "name": "Hesap Özeti",
+      "file": "19-hesap-ozeti.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Açık tema hesap özeti"
+    },
+    {
+      "id": "20-terminal",
+      "name": "Masaüstü · Terminal",
+      "file": "20-terminal.html",
+      "kind": "list",
+      "width": 1100,
+      "height": "auto",
+      "description": "Monospace terminal tablosu"
+    },
+    {
+      "id": "21-kare-koyu",
+      "name": "Kare · Koyu",
+      "file": "21-kare-koyu.html",
+      "kind": "single",
+      "width": 1080,
+      "height": 1080,
+      "description": "Sosyal medya için 1:1, koyu"
+    },
+    {
+      "id": "22-kare-acik",
+      "name": "Kare · Açık",
+      "file": "22-kare-acik.html",
+      "kind": "single",
+      "width": 1080,
+      "height": 1080,
+      "description": "Sosyal medya için 1:1, açık"
+    },
+    {
+      "id": "23-ozet-kart",
+      "name": "Özet Kart",
+      "file": "23-ozet-kart.html",
+      "kind": "list",
+      "width": 900,
+      "height": "auto",
+      "description": "Dağılım çubuğu + tablo kartı"
+    },
+    {
+      "id": "24-koyu-donut",
+      "name": "Koyu · Donut",
+      "file": "24-koyu-donut.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Koyu tema dağılım ekranı"
+    },
+    {
+      "id": "25-acik-liste",
+      "name": "Açık · Portföy Listesi",
+      "file": "25-acik-liste.html",
+      "kind": "list",
+      "width": 430,
+      "height": 932,
+      "description": "Sade beyaz liste, sekmeli"
+    }
+  ]
+}

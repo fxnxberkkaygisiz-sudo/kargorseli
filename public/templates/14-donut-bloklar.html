@@ -1,0 +1,109 @@
+<style>
+  .t14 { width:430px; box-sizing:border-box; overflow:hidden; background:#F1F3F5; color:#182029;
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t14 * { box-sizing:border-box; }
+  .t14-sb { height:48px; padding:0 22px 0 28px; background:#0F6E63; color:#fff;
+    display:flex; align-items:center; justify-content:space-between; font-size:14.5px; font-weight:600; }
+  .t14-sbr { display:flex; align-items:center; gap:6px; }
+  .t14-nav { height:56px; background:#0F6E63; color:#fff; padding:0 18px;
+    display:flex; align-items:center; justify-content:space-between; }
+  .t14-nt { font-size:19px; font-weight:650; }
+  .t14-band { background:#0B5A51; color:#fff; padding:16px 22px 18px; }
+  .t14-br { display:flex; justify-content:space-between; padding:5px 0; }
+  .t14-bk { font-size:14.5px; opacity:.94; }
+  .t14-bv { font-size:15.5px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t14-don { background:#fff; padding:22px 0 18px; text-align:center; }
+  .t14-cen { font-size:19px; font-weight:750; }
+  .t14-cent { font-size:12px; color:#78828F; margin-top:2px; }
+  .t14-leg { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 16px;
+    padding:14px 22px 0; }
+  .t14-lg { display:flex; align-items:center; gap:7px; font-size:12px; color:#4A5563; }
+  .t14-ld { width:9px; height:9px; border-radius:2px; }
+  .t14-blk { background:#fff; margin-top:10px; padding:16px 20px; border-top:1px solid #E6EAEE; }
+  .t14-bh { display:flex; align-items:center; justify-content:space-between; }
+  .t14-bl { display:flex; align-items:center; gap:11px; }
+  .t14-img { width:36px; height:36px; border-radius:9px; object-fit:contain; background:#fff;
+    border:1px solid #E6EAEE; padding:3px; flex:none; }
+  .t14-av { width:36px; height:36px; border-radius:9px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; }
+  .t14-c { font-size:17px; font-weight:750; }
+  .t14-btns { display:flex; gap:8px; }
+  .t14-b { padding:7px 20px; border-radius:6px; font-size:13.5px; font-weight:650;
+    border:1.5px solid #0F6E63; color:#0F6E63; }
+  .t14-rows { margin-top:12px; }
+  .t14-r { display:flex; justify-content:space-between; padding:7px 0; font-size:14px; }
+  .t14-k { color:#67707C; }
+  .t14-v { font-weight:600; font-variant-numeric:tabular-nums; }
+  .t14-ft { background:#fff; border-top:1px solid #E6EAEE; padding:15px 22px;
+    display:flex; justify-content:space-between; align-items:center; }
+  .t14-fk { font-size:14px; color:#4A5563; }
+  .t14-fv { font-size:19px; font-weight:800; color:{{trendColor}}; font-variant-numeric:tabular-nums; }
+  .t14-meta { background:#fff; padding:0 22px 18px; font-size:11px; color:#98A0AB;
+    display:flex; justify-content:space-between; }
+</style>
+
+<div class="t14">
+  <div class="t14-sb"><span>{{time}}</span><span class="t14-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#fff"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".55"/></svg>
+  </span></div>
+
+  <div class="t14-nav">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+    <div class="t14-nt">{{brand}}</div>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.8" r=".9" fill="#fff"/></svg>
+  </div>
+
+  <div class="t14-band">
+    <div class="t14-br"><span class="t14-bk">Toplam Hisse Varlığı</span><span class="t14-bv">{{valueNum}} {{symbol}}</span></div>
+    <div class="t14-br"><span class="t14-bk">Toplam Kar / Zarar</span><span class="t14-bv">{{pnlSigned}} {{symbol}}</span></div>
+    <div class="t14-br"><span class="t14-bk">Kullanılabilir Bakiye</span><span class="t14-bv">{{cashNum}} {{symbol}}</span></div>
+  </div>
+
+  <div class="t14-don">
+    <svg width="190" height="190" viewBox="0 0 120 120">
+      {{#rows}}
+      <circle cx="60" cy="60" r="45" fill="none" stroke="{{rowColor}}" stroke-width="17"
+        pathLength="100" stroke-dasharray="{{donutDash}}" stroke-dashoffset="{{donutOffset}}"
+        transform="rotate(-90 60 60)"/>
+      {{/rows}}
+      <text x="60" y="57" text-anchor="middle" font-size="13" font-weight="700" fill="#182029"
+        font-family="-apple-system, Segoe UI, Roboto, sans-serif">%{{topShare}}</text>
+      <text x="60" y="71" text-anchor="middle" font-size="10" fill="#78828F"
+        font-family="-apple-system, Segoe UI, Roboto, sans-serif">{{topCode}}</text>
+    </svg>
+    <div class="t14-leg">
+      {{#rows}}
+      <div class="t14-lg"><span class="t14-ld" style="background:{{rowColor}}"></span>{{code}} %{{share}}</div>
+      {{/rows}}
+    </div>
+  </div>
+
+  {{#rows}}
+  <div class="t14-blk">
+    <div class="t14-bh">
+      <div class="t14-bl">
+        {{#hasLogo}}<img class="t14-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+        {{^hasLogo}}<div class="t14-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+        <div class="t14-c">{{code}}</div>
+      </div>
+      <div class="t14-btns"><div class="t14-b">Al</div><div class="t14-b">Sat</div></div>
+    </div>
+    <div class="t14-rows">
+      <div class="t14-r"><span class="t14-k">Fiyat / Değişim</span><span class="t14-v">{{price}} {{symbol}} / {{pnlPercent}}</span></div>
+      <div class="t14-r"><span class="t14-k">Tutar</span><span class="t14-v">{{valueNum}} {{symbol}}</span></div>
+      <div class="t14-r"><span class="t14-k">Ortalama Maliyet</span><span class="t14-v">{{cost}}</span></div>
+      <div class="t14-r"><span class="t14-k">Adet</span><span class="t14-v">{{lot}}</span></div>
+      <div class="t14-r"><span class="t14-k">Kar / Zarar</span><span class="t14-v" style="color:{{trendColor}}">{{pnlSigned}}</span></div>
+    </div>
+  </div>
+  {{/rows}}
+
+  <div class="t14-ft">
+    <span class="t14-fk">Toplam Kar / Zarar</span>
+    <span class="t14-fv">{{pnlSigned}} {{symbol}}</span>
+  </div>
+  <div class="t14-meta"><span>{{datetime}}</span><span>{{txId}}</span></div>
+</div>

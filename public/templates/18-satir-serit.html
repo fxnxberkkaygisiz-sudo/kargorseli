@@ -1,0 +1,47 @@
+<style>
+  .t18 { width:780px; height:230px; box-sizing:border-box; overflow:hidden; background:#fff;
+    color:#12161C; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; align-items:center; padding:0 34px; gap:28px;
+    border:1px solid #E4E8ED; border-left:6px solid {{trendColor}}; }
+  .t18 * { box-sizing:border-box; }
+  .t18-img { width:64px; height:64px; border-radius:16px; object-fit:contain; background:#fff;
+    border:1px solid #EDF0F4; padding:5px; flex:none; }
+  .t18-av { width:64px; height:64px; border-radius:16px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:25px; font-weight:800; color:#fff; }
+  .t18-id { width:150px; flex:none; }
+  .t18-c { font-size:25px; font-weight:750; letter-spacing:-.4px; }
+  .t18-n { font-size:12.5px; color:#8A92A1; margin-top:3px; }
+  .t18-grid { flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .t18-k { font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:#98A0AB; }
+  .t18-v { font-size:16px; font-weight:650; margin-top:5px; font-variant-numeric:tabular-nums; }
+  .t18-pnl { width:190px; flex:none; text-align:right; padding-left:20px;
+    border-left:1px solid #EDF0F4; }
+  .t18-pk { font-size:10.5px; letter-spacing:1.4px; text-transform:uppercase; color:#98A0AB; }
+  .t18-pv { font-size:29px; font-weight:750; letter-spacing:-1px; margin-top:5px;
+    color:{{trendColor}}; font-variant-numeric:tabular-nums; }
+  .t18-pp { display:inline-block; margin-top:8px; font-size:13px; font-weight:700; color:#fff;
+    background:{{trendColor}}; padding:4px 11px; border-radius:7px; }
+</style>
+
+<div class="t18">
+  {{#hasLogo}}<img class="t18-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+  {{^hasLogo}}<div class="t18-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+
+  <div class="t18-id">
+    <div class="t18-c">{{code}}</div>
+    <div class="t18-n">{{shortName}}</div>
+  </div>
+
+  <div class="t18-grid">
+    <div><div class="t18-k">Adet</div><div class="t18-v">{{lot}}</div></div>
+    <div><div class="t18-k">Maliyet</div><div class="t18-v">{{cost}}</div></div>
+    <div><div class="t18-k">Güncel</div><div class="t18-v">{{price}}</div></div>
+    <div><div class="t18-k">Değer</div><div class="t18-v">{{valueNum}}</div></div>
+  </div>
+
+  <div class="t18-pnl">
+    <div class="t18-pk">Kâr / Zarar</div>
+    <div class="t18-pv">{{pnl}}</div>
+    <div><span class="t18-pp">{{trendArrow}} {{pnlPercent}}</span></div>
+  </div>
+</div>

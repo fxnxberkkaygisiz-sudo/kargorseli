@@ -1,0 +1,99 @@
+<style>
+  .t25 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#fff;
+    color:#111820; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t25 * { box-sizing:border-box; }
+  .t25-sb { height:50px; padding:0 24px 0 30px; display:flex; align-items:center;
+    justify-content:space-between; font-size:15px; font-weight:600; }
+  .t25-sbr { display:flex; align-items:center; gap:6px; }
+  .t25-nav { height:58px; padding:0 20px; display:flex; align-items:center;
+    justify-content:space-between; }
+  .t25-nt { font-size:26px; font-weight:800; letter-spacing:-.6px; }
+  .t25-ni { display:flex; gap:16px; color:#7E8894; }
+  .t25-sum { padding:8px 20px 22px; }
+  .t25-sk { font-size:13px; color:#7E8894; }
+  .t25-sv { font-size:34px; font-weight:750; letter-spacing:-1.2px; margin-top:5px;
+    font-variant-numeric:tabular-nums; }
+  .t25-sc { display:inline-flex; align-items:center; gap:7px; margin-top:10px; font-size:13.5px;
+    font-weight:700; color:{{trendColor}}; background:{{trendColorSoft}}; padding:6px 12px;
+    border-radius:8px; }
+  .t25-seg { margin:0 20px; display:flex; gap:22px; border-bottom:1px solid #EDF0F3; }
+  .t25-sg { padding:0 0 12px; font-size:14.5px; font-weight:650; color:#9AA3AE; }
+  .t25-sg.on { color:#111820; box-shadow:inset 0 -2.5px 0 #111820; }
+  .t25-row { display:flex; align-items:center; padding:16px 20px; border-bottom:1px solid #F3F5F7; }
+  .t25-img { width:40px; height:40px; border-radius:11px; object-fit:contain; background:#fff;
+    border:1px solid #EDF0F3; padding:4px; margin-right:13px; flex:none; }
+  .t25-av { width:40px; height:40px; border-radius:11px; margin-right:13px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:800; color:#fff; }
+  .t25-c { font-size:15.5px; font-weight:700; }
+  .t25-n { font-size:12px; color:#7E8894; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t25-v { margin-left:auto; text-align:right; }
+  .t25-a { font-size:15.5px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .t25-p { font-size:12.5px; font-weight:650; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t25-tot { margin-top:auto; padding:18px 20px; border-top:1px solid #EDF0F3; display:flex;
+    justify-content:space-between; align-items:center; }
+  .t25-tk { font-size:13.5px; color:#5F6975; }
+  .t25-tv { font-size:20px; font-weight:800; color:{{trendColor}}; font-variant-numeric:tabular-nums; }
+  .t25-tab { height:74px; border-top:1px solid #EDF0F3; display:flex; padding-top:11px; }
+  .t25-t { flex:1; text-align:center; color:#A7AFBA; font-size:10px; }
+  .t25-t.on { color:#111820; }
+  .t25-t svg { display:block; margin:0 auto 4px; }
+  .t25-home { width:140px; height:5px; border-radius:3px; background:#111820; opacity:.85;
+    margin:0 auto 8px; }
+</style>
+
+<div class="t25">
+  <div class="t25-sb"><span>{{time}}</span><span class="t25-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#111820"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#111820"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#111820"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#111820" stroke-opacity=".4"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t25-nav">
+    <div class="t25-nt">{{brand}}</div>
+    <div class="t25-ni">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7"/><path d="M10.5 20a2 2 0 0 0 3 0"/></svg>
+    </div>
+  </div>
+
+  <div class="t25-sum">
+    <div class="t25-sk">Portföy değeri</div>
+    <div class="t25-sv">{{symbol}}{{valueNum}}</div>
+    <div class="t25-sc">{{trendArrow}} {{pnl}} ({{pnlPercent}})</div>
+  </div>
+
+  <div class="t25-seg">
+    <div class="t25-sg on">Pozisyonlar</div>
+    <div class="t25-sg">Emirler</div>
+    <div class="t25-sg">Geçmiş</div>
+  </div>
+
+  {{#rows}}
+  <div class="t25-row">
+    {{#hasLogo}}<img class="t25-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+    {{^hasLogo}}<div class="t25-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+    <div>
+      <div class="t25-c">{{code}}</div>
+      <div class="t25-n">{{lot}} adet · ort. {{cost}}</div>
+    </div>
+    <div class="t25-v">
+      <div class="t25-a">{{symbol}}{{valueNum}}</div>
+      <div class="t25-p" style="color:{{trendColor}}">{{pnl}} ({{pnlPercent}})</div>
+    </div>
+  </div>
+  {{/rows}}
+
+  <div class="t25-tot">
+    <span class="t25-tk">Toplam kâr / zarar</span>
+    <span class="t25-tv">{{pnl}}</span>
+  </div>
+
+  <div class="t25-tab">
+    <div class="t25-t on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>Portföy</div>
+    <div class="t25-t"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18"/></svg>Piyasa</div>
+    <div class="t25-t"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Emirler</div>
+    <div class="t25-t"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.2 3.4-6.8 7.5-6.8s7.5 2.6 7.5 6.8"/></svg>Profil</div>
+  </div>
+  <div class="t25-home"></div>
+</div>

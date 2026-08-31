@@ -1,0 +1,66 @@
+<style>
+  .t22 { width:1080px; height:1080px; box-sizing:border-box; overflow:hidden; background:#fff;
+    color:#12161C; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    padding:80px; display:flex; flex-direction:column; }
+  .t22 * { box-sizing:border-box; }
+  .t22-hd { display:flex; align-items:center; justify-content:space-between;
+    padding-bottom:34px; border-bottom:1px solid #E7EAEF; }
+  .t22-b { font-size:30px; font-weight:700; letter-spacing:-.4px; }
+  .t22-s { font-size:17px; color:#8A92A1; margin-top:8px; }
+  .t22-d { font-size:17px; color:#8A92A1; }
+  .t22-mid { margin:auto 0; display:flex; align-items:center; gap:34px; }
+  .t22-img { width:120px; height:120px; border-radius:30px; object-fit:contain; background:#fff;
+    border:1px solid #E7EAEF; padding:12px; flex:none; }
+  .t22-av { width:120px; height:120px; border-radius:30px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:50px; font-weight:800; color:#fff; }
+  .t22-c { font-size:58px; font-weight:750; letter-spacing:-1.4px; }
+  .t22-n { font-size:21px; color:#8A92A1; margin-top:8px; }
+  .t22-pblock { margin-top:56px; }
+  .t22-pk { font-size:18px; letter-spacing:3.4px; text-transform:uppercase; color:#8A92A1; }
+  .t22-pv { font-size:112px; font-weight:750; letter-spacing:-4px; line-height:1; margin-top:18px;
+    color:{{trendColor}}; font-variant-numeric:tabular-nums; }
+  .t22-pp { display:inline-flex; align-items:center; gap:12px; margin-top:26px; font-size:32px;
+    font-weight:700; color:{{trendColor}}; background:{{trendColorSoft}};
+    border:1px solid {{trendBorder}}; padding:13px 30px; border-radius:14px; }
+  .t22-grid { display:flex; gap:18px; margin-top:56px; }
+  .t22-cell { flex:1; background:#F7F8FA; border:1px solid #E7EAEF; border-radius:20px; padding:24px 26px; }
+  .t22-ck { font-size:16px; color:#8A92A1; }
+  .t22-cv { font-size:29px; font-weight:700; margin-top:10px; font-variant-numeric:tabular-nums; }
+  .t22-ft { margin-top:40px; padding-top:26px; border-top:1px solid #E7EAEF;
+    display:flex; justify-content:space-between; font-size:16px; color:#A3AAB6; }
+</style>
+
+<div class="t22">
+  <div class="t22-hd">
+    <div>
+      <div class="t22-b">{{brand}}</div>
+      {{#hasSubtitle}}<div class="t22-s">{{subtitle}}</div>{{/hasSubtitle}}
+    </div>
+    <div class="t22-d">{{date}}</div>
+  </div>
+
+  <div>
+    <div class="t22-mid">
+      {{#hasLogo}}<img class="t22-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+      {{^hasLogo}}<div class="t22-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+      <div>
+        <div class="t22-c">{{code}}</div>
+        <div class="t22-n">{{shortName}}</div>
+      </div>
+    </div>
+
+    <div class="t22-pblock">
+      <div class="t22-pk">Kâr / Zarar</div>
+      <div class="t22-pv">{{pnl}}</div>
+      <div><span class="t22-pp">{{trendArrow}} {{pnlPercent}}</span></div>
+    </div>
+
+    <div class="t22-grid">
+      <div class="t22-cell"><div class="t22-ck">Adet</div><div class="t22-cv">{{lot}}</div></div>
+      <div class="t22-cell"><div class="t22-ck">Maliyet</div><div class="t22-cv">{{cost}}</div></div>
+      <div class="t22-cell"><div class="t22-ck">Güncel</div><div class="t22-cv">{{price}}</div></div>
+    </div>
+  </div>
+
+  <div class="t22-ft"><span>{{datetime}}</span><span>{{txId}}</span></div>
+</div>

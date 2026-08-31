@@ -1,0 +1,49 @@
+<style>
+  .t11 { width:780px; height:340px; box-sizing:border-box; overflow:hidden; background:#fff;
+    color:#1B2430; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; border:1px solid #E3E7EB; }
+  .t11 * { box-sizing:border-box; }
+  .t11-hd { background:#00857C; color:#fff; padding:20px 30px; display:flex;
+    align-items:center; justify-content:space-between; }
+  .t11-t { font-size:20px; font-weight:650; }
+  .t11-d { font-size:13px; opacity:.85; }
+  .t11-band { background:#009B90; color:#fff; padding:20px 30px; }
+  .t11-r { display:flex; justify-content:space-between; align-items:baseline; padding:6px 0; }
+  .t11-k { font-size:16px; opacity:.95; }
+  .t11-v { font-size:17px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t11-ft { flex:1; padding:16px 30px; display:flex; align-items:center; justify-content:space-between; }
+  .t11-fk { font-size:14px; color:#4A5563; }
+  .t11-fv { font-size:26px; font-weight:750; font-variant-numeric:tabular-nums;
+    color:{{trendColor}}; }
+  .t11-fp { font-size:15px; font-weight:700; color:{{trendColor}}; margin-top:2px; text-align:right; }
+  .t11-meta { font-size:11.5px; color:#9AA3AE; padding:0 30px 14px; display:flex;
+    justify-content:space-between; }
+</style>
+
+<div class="t11">
+  <div class="t11-hd">
+    <div class="t11-t">{{brand}}</div>
+    <div class="t11-d">{{date}}</div>
+  </div>
+
+  <div class="t11-band">
+    <div class="t11-r"><span class="t11-k">Toplam Hisse Varlığı</span><span class="t11-v">{{valueNum}} {{symbol}}</span></div>
+    <div class="t11-r"><span class="t11-k">Toplam Kar / Zarar</span><span class="t11-v">{{pnlSigned}} {{symbol}}</span></div>
+    <div class="t11-r"><span class="t11-k">Kullanılabilir Bakiye</span><span class="t11-v">{{cashNum}} {{symbol}}</span></div>
+    <div class="t11-r"><span class="t11-k">Maliyet Tutarı</span><span class="t11-v">{{investmentNum}} {{symbol}}</span></div>
+  </div>
+
+  <div class="t11-ft">
+    <div>
+      <div class="t11-fk">Pozisyon sayısı</div>
+      <div style="font-size:22px;font-weight:700;margin-top:3px">{{rowCount}}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="t11-fk">Net kâr / zarar</div>
+      <div class="t11-fv">{{pnl}}</div>
+      <div class="t11-fp">{{trendArrow}} {{pnlPercent}}</div>
+    </div>
+  </div>
+
+  <div class="t11-meta"><span>{{datetime}}</span><span>{{txId}}</span></div>
+</div>

@@ -1,0 +1,57 @@
+<style>
+  .t04 { width:760px; height:420px; box-sizing:border-box; overflow:hidden; background:#0D0F13;
+    color:#E9ECF1; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; border:1px solid #1B1E25; }
+  .t04 * { box-sizing:border-box; }
+  .t04-l { flex:1.15; padding:32px 34px; display:flex; flex-direction:column; }
+  .t04-r { flex:1; padding:32px 34px; background:#0A0B0E; border-left:1px solid #1B1E25;
+    display:flex; flex-direction:column; justify-content:center; }
+  .t04-top { display:flex; align-items:center; gap:14px; }
+  .t04-av { width:52px; height:52px; border-radius:14px; display:flex; align-items:center;
+    justify-content:center; font-size:21px; font-weight:800; color:#fff; }
+  .t04-c { font-size:26px; font-weight:750; letter-spacing:-.4px; }
+  .t04-n { font-size:13px; color:#7E8590; margin-top:2px; }
+  .t04-rows { margin-top:22px; }
+  .t04-row { display:flex; justify-content:space-between; padding:10px 0;
+    border-bottom:1px solid #171A20; }
+  .t04-row:last-child { border-bottom:0; }
+  .t04-k { font-size:13.5px; color:#8B929D; }
+  .t04-v { font-size:14.5px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .t04-ft { margin-top:auto; font-size:11px; color:#565D68; letter-spacing:.3px; }
+  .t04-lbl { font-size:11.5px; letter-spacing:2.4px; text-transform:uppercase; color:#6D7480; }
+  .t04-pnl { font-size:44px; font-weight:750; letter-spacing:-1.8px; margin-top:12px;
+    color:{{trendColorDark}}; font-variant-numeric:tabular-nums; }
+  .t04-pct { display:inline-flex; align-items:center; gap:7px; margin-top:14px; font-size:15px;
+    font-weight:700; color:{{trendColorDark}}; background:{{trendColorSoft}};
+    border:1px solid {{trendBorder}}; padding:7px 14px; border-radius:9px; }
+  .t04-sp { margin-top:22px; }
+</style>
+
+<div class="t04">
+  <div class="t04-l">
+    <div class="t04-top">
+      {{#hasLogo}}<img class="t04-av" style="object-fit:contain;background:#fff;padding:3px" src="{{{logo}}}" alt="">{{/hasLogo}}{{^hasLogo}}<div class="t04-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+      <div><div class="t04-c">{{code}}</div><div class="t04-n">{{shortName}}</div></div>
+    </div>
+    <div class="t04-rows">
+      <div class="t04-row"><span class="t04-k">Adet</span><span class="t04-v">{{lot}}</span></div>
+      <div class="t04-row"><span class="t04-k">Ortalama maliyet</span><span class="t04-v">{{symbol}}{{cost}}</span></div>
+      <div class="t04-row"><span class="t04-k">Güncel fiyat</span><span class="t04-v">{{symbol}}{{price}}</span></div>
+      <div class="t04-row"><span class="t04-k">Maliyet tutarı</span><span class="t04-v">{{symbol}}{{investmentNum}}</span></div>
+      <div class="t04-row"><span class="t04-k">Güncel değer</span><span class="t04-v">{{symbol}}{{valueNum}}</span></div>
+    </div>
+    <div class="t04-ft">{{datetime}} · {{txId}}</div>
+  </div>
+
+  <div class="t04-r">
+    <div class="t04-lbl">Kâr / Zarar</div>
+    <div class="t04-pnl">{{pnl}}</div>
+    <div><span class="t04-pct">{{trendArrow}} {{pnlPercent}}</span></div>
+    <div class="t04-sp">
+      <svg viewBox="0 0 200 60" width="100%" height="80" preserveAspectRatio="none">
+        <path d="{{sparkPath}}" fill="none" stroke="{{trendColorDark}}" stroke-width="1.6"
+          stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+    </div>
+  </div>
+</div>

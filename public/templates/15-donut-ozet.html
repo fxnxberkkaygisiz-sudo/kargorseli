@@ -1,0 +1,110 @@
+<style>
+  .t15 { width:820px; height:480px; box-sizing:border-box; overflow:hidden; background:#fff;
+    color:#151A21; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; border:1px solid #E4E8ED; }
+  .t15 * { box-sizing:border-box; }
+  .t15-l { width:320px; flex:none; padding:32px; background:#FAFBFC;
+    border-right:1px solid #E4E8ED; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; }
+  .t15-r { flex:1; padding:30px 34px; display:flex; flex-direction:column; }
+  .t15-leg { margin-top:20px; width:100%; }
+  .t15-lr { display:flex; align-items:center; gap:9px; padding:6px 0; font-size:13px; }
+  .t15-ld { width:10px; height:10px; border-radius:3px; flex:none; }
+  .t15-lc { font-weight:650; }
+  .t15-lp { margin-left:auto; color:#6B7482; font-variant-numeric:tabular-nums; }
+  .t15-hd { display:flex; align-items:flex-start; justify-content:space-between;
+    padding-bottom:18px; border-bottom:1px solid #EDF0F3; }
+  .t15-t { font-size:21px; font-weight:750; letter-spacing:-.3px; }
+  .t15-s { font-size:12px; color:#8A92A1; margin-top:4px; }
+  .t15-tk { font-size:10.5px; letter-spacing:1.6px; text-transform:uppercase; color:#8A92A1;
+    text-align:right; }
+  .t15-tv { font-size:27px; font-weight:750; letter-spacing:-.8px; margin-top:4px;
+    color:{{trendColor}}; font-variant-numeric:tabular-nums; text-align:right; }
+  .t15-tp { font-size:13px; font-weight:700; color:{{trendColor}}; text-align:right; margin-top:2px; }
+  .t15-kp { display:flex; gap:10px; margin-top:18px; }
+  .t15-k { flex:1; background:#FAFBFC; border:1px solid #EDF0F3; border-radius:11px; padding:13px 15px; }
+  .t15-kk { font-size:11px; color:#8A92A1; }
+  .t15-kv { font-size:16px; font-weight:700; margin-top:5px; font-variant-numeric:tabular-nums; }
+  .t15-tbl { width:100%; border-collapse:collapse; margin-top:16px; }
+  .t15-tbl th { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:#8A92A1;
+    text-align:right; padding:8px 6px; font-weight:600; border-bottom:1px solid #EDF0F3; }
+  .t15-tbl th:first-child { text-align:left; }
+  .t15-tbl td { padding:11px 6px; font-size:13.5px; text-align:right;
+    border-bottom:1px solid #F4F6F8; font-variant-numeric:tabular-nums; }
+  .t15-tbl td:first-child { text-align:left; }
+  .t15-sym { display:flex; align-items:center; gap:9px; }
+  .t15-img { width:26px; height:26px; border-radius:7px; object-fit:contain; background:#fff;
+    border:1px solid #EDF0F3; padding:2px; flex:none; }
+  .t15-av { width:26px; height:26px; border-radius:7px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; }
+  .t15-ft { margin-top:auto; padding-top:14px; display:flex; justify-content:space-between;
+    font-size:11px; color:#A3AAB6; }
+</style>
+
+<div class="t15">
+  <div class="t15-l">
+    <svg width="200" height="200" viewBox="0 0 120 120">
+      {{#rows}}
+      <circle cx="60" cy="60" r="45" fill="none" stroke="{{rowColor}}" stroke-width="16"
+        pathLength="100" stroke-dasharray="{{donutDash}}" stroke-dashoffset="{{donutOffset}}"
+        transform="rotate(-90 60 60)"/>
+      {{/rows}}
+      <text x="60" y="56" text-anchor="middle" font-size="12" font-weight="700" fill="#151A21"
+        font-family="-apple-system, Segoe UI, Roboto, sans-serif">%{{topShare}}</text>
+      <text x="60" y="70" text-anchor="middle" font-size="9" fill="#8A92A1"
+        font-family="-apple-system, Segoe UI, Roboto, sans-serif">{{topCode}}</text>
+    </svg>
+    <div class="t15-leg">
+      {{#rows}}
+      <div class="t15-lr">
+        <span class="t15-ld" style="background:{{rowColor}}"></span>
+        <span class="t15-lc">{{code}}</span>
+        <span class="t15-lp">%{{sharePercent}}</span>
+      </div>
+      {{/rows}}
+    </div>
+  </div>
+
+  <div class="t15-r">
+    <div class="t15-hd">
+      <div>
+        <div class="t15-t">{{brand}}</div>
+        <div class="t15-s">{{#hasSubtitle}}{{subtitle}} · {{/hasSubtitle}}{{date}}</div>
+      </div>
+      <div>
+        <div class="t15-tk">Toplam K / Z</div>
+        <div class="t15-tv">{{pnl}}</div>
+        <div class="t15-tp">{{trendArrow}} {{pnlPercent}}</div>
+      </div>
+    </div>
+
+    <div class="t15-kp">
+      <div class="t15-k"><div class="t15-kk">Maliyet</div><div class="t15-kv">{{investmentNum}}</div></div>
+      <div class="t15-k"><div class="t15-kk">Güncel değer</div><div class="t15-kv">{{valueNum}}</div></div>
+      <div class="t15-k"><div class="t15-kk">Pozisyon</div><div class="t15-kv">{{rowCount}}</div></div>
+    </div>
+
+    <table class="t15-tbl">
+      <thead><tr><th>Sembol</th><th>Adet</th><th>Maliyet</th><th>Güncel</th><th>K/Z</th></tr></thead>
+      <tbody>
+        {{#rows}}
+        <tr>
+          <td>
+            <div class="t15-sym">
+              {{#hasLogo}}<img class="t15-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+              {{^hasLogo}}<div class="t15-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+              <b>{{code}}</b>
+            </div>
+          </td>
+          <td>{{lot}}</td>
+          <td>{{cost}}</td>
+          <td>{{price}}</td>
+          <td style="color:{{trendColor}};font-weight:650">{{pnlSigned}}</td>
+        </tr>
+        {{/rows}}
+      </tbody>
+    </table>
+
+    <div class="t15-ft"><span>{{datetime}}</span><span>{{txId}}</span></div>
+  </div>
+</div>

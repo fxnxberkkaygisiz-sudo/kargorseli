@@ -1,0 +1,102 @@
+<style>
+  .t09 { --band:#12356B; --bandTop:#1B4A93;
+    width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#F2F4F6;
+    color:#1B2430; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t09 * { box-sizing:border-box; }
+  .t09-sb { height:48px; padding:0 22px 0 28px; background:var(--bandTop); color:#fff;
+    display:flex; align-items:center; justify-content:space-between; font-size:14.5px; font-weight:600; }
+  .t09-sbr { display:flex; align-items:center; gap:6px; }
+  .t09-nav { height:56px; background:var(--bandTop); color:#fff; padding:0 18px;
+    display:flex; align-items:center; justify-content:space-between; }
+  .t09-nt { font-size:19px; font-weight:650; }
+  .t09-band { background:var(--band); color:#fff; padding:18px 22px 20px; }
+  .t09-br { display:flex; justify-content:space-between; align-items:baseline; padding:6px 0; }
+  .t09-bk { font-size:15px; opacity:.94; }
+  .t09-bv { font-size:16px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t09-sel { background:#fff; padding:16px 22px; display:flex; align-items:center;
+    justify-content:space-between; border-bottom:1px solid #E3E7EB; }
+  .t09-sk { font-size:15px; color:#4A5563; }
+  .t09-sv { display:flex; align-items:center; gap:10px; font-size:15px; color:#1B2430;
+    border-bottom:1.5px solid var(--band); padding:0 4px 4px; min-width:140px;
+    justify-content:space-between; }
+  .t09-list { background:#fff; flex:1; }
+  .t09-row { display:flex; align-items:center; padding:14px 22px; border-bottom:1px solid #EDF0F3;
+    border-left:4px solid transparent; }
+  .t09-c { font-size:15.5px; font-weight:700; }
+  .t09-lg { width:34px; height:34px; border-radius:8px; object-fit:contain; background:#fff;
+    border:1px solid #E8ECEF; padding:3px; margin-right:12px; flex:none; }
+  .t09-s { font-size:12px; color:#78828F; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t09-rv { margin-left:auto; text-align:right; }
+  .t09-a { font-size:15px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t09-p { font-size:13px; font-weight:700; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .t09-tot { background:#fff; border-top:2px solid #E3E7EB; padding:14px 22px;
+    display:flex; justify-content:space-between; align-items:center; }
+  .t09-tk { font-size:14px; color:#4A5563; }
+  .t09-tv { font-size:18px; font-weight:750; font-variant-numeric:tabular-nums; }
+  .t09-tab { height:70px; background:#fff; border-top:1px solid #E3E7EB; display:flex; padding-top:10px; }
+  .t09-t { flex:1; text-align:center; font-size:10px; color:#9AA3AE; }
+  .t09-t.on { color:var(--band); }
+  .t09-t svg { display:block; margin:0 auto 4px; }
+  .t09-home { width:140px; height:5px; border-radius:3px; background:#1B2430; opacity:.8;
+    margin:0 auto 8px; background-clip:padding-box; }
+  .t09-hw { background:#fff; }
+</style>
+
+<div class="t09">
+  <div class="t09-sb"><span>{{time}}</span><span class="t09-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#fff"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".55"/></svg>
+  </span></div>
+
+  <div class="t09-nav">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+    <div class="t09-nt">{{brand}}</div>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.8" r=".9" fill="#fff"/></svg>
+  </div>
+
+  <div class="t09-band">
+    <div class="t09-br"><span class="t09-bk">Toplam Hisse Varlığı</span><span class="t09-bv">{{valueNum}} {{symbol}}</span></div>
+    <div class="t09-br"><span class="t09-bk">Toplam Kar / Zarar</span><span class="t09-bv">{{pnlSigned}} {{symbol}}</span></div>
+    <div class="t09-br"><span class="t09-bk">Kullanılabilir Bakiye</span><span class="t09-bv">{{cashNum}} {{symbol}}</span></div>
+    <div class="t09-br"><span class="t09-bk">Maliyet Tutarı</span><span class="t09-bv">{{investmentNum}} {{symbol}}</span></div>
+  </div>
+
+  <div class="t09-sel">
+    <div class="t09-sk">Hisse Senedi Hesabı</div>
+    <div class="t09-sv">
+      <span>{{#hasAccountNo}}{{accountNo}}{{/hasAccountNo}}{{^hasAccountNo}}Standart{{/hasAccountNo}}</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12356B" stroke-width="2.4"><path d="M5 9l7 7 7-7"/></svg>
+    </div>
+  </div>
+
+  <div class="t09-list">
+    {{#rows}}
+    <div class="t09-row" style="border-left-color:{{rowColor}}">
+      {{#hasLogo}}<img class="t09-lg" src="{{{logo}}}" alt="">{{/hasLogo}}
+      <div>
+        <div class="t09-c">{{code}}</div>
+        <div class="t09-s">{{lot}} adet · ort. {{cost}} · güncel {{price}}</div>
+      </div>
+      <div class="t09-rv">
+        <div class="t09-a">{{valueNum}} {{symbol}}</div>
+        <div class="t09-p" style="color:{{trendColor}}">{{pnlSigned}} ({{pnlPercent}})</div>
+      </div>
+    </div>
+    {{/rows}}
+  </div>
+
+  <div class="t09-tot">
+    <span class="t09-tk">Toplam Kar / Zarar</span>
+    <span class="t09-tv" style="color:{{trendColor}}">{{pnlSigned}} {{symbol}}</span>
+  </div>
+
+  <div class="t09-tab">
+    <div class="t09-t"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11 12 4l9 7v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Ana Sayfa</div>
+    <div class="t09-t"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18"/></svg>Hesaplar</div>
+    <div class="t09-t on"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg>İşlemler</div>
+    <div class="t09-t"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>Durum</div>
+  </div>
+  <div class="t09-hw"><div class="t09-home"></div></div>
+</div>

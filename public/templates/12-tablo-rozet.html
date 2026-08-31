@@ -1,0 +1,96 @@
+<style>
+  .t12 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#EFF1F4;
+    color:#15181D; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t12 * { box-sizing:border-box; }
+  .t12-sb { height:48px; padding:0 22px 0 28px; display:flex; align-items:center;
+    justify-content:space-between; font-size:14.5px; font-weight:600; }
+  .t12-sbr { display:flex; align-items:center; gap:6px; }
+  .t12-nav { height:56px; padding:0 18px; display:flex; align-items:center;
+    justify-content:space-between; }
+  .t12-nt { font-size:21px; font-weight:800; letter-spacing:-.3px; }
+  .t12-ni { display:flex; gap:16px; color:#5A6371; }
+  .t12-tabs { margin:6px 16px 0; background:#fff; border-radius:12px; padding:8px;
+    display:flex; gap:8px; }
+  .t12-tb { flex:1; text-align:center; padding:11px 0; border-radius:8px; font-size:15px;
+    font-weight:700; color:#5A6371; }
+  .t12-tb.on { background:#D9202C; color:#fff; }
+  .t12-sel { margin:12px 16px 0; background:#fff; border:1px solid #DDE1E6; border-radius:10px;
+    padding:14px 16px; display:flex; align-items:center; justify-content:space-between;
+    font-size:15px; color:#3B4450; }
+  .t12-panel { margin:12px 16px 0; background:#fff; border-radius:12px; flex:1; overflow:hidden; }
+  .t12-th { display:grid; grid-template-columns:1fr 74px 76px 92px; padding:14px 16px 10px;
+    font-size:11.5px; color:#6B7482; border-bottom:1px solid #E4E7EB; }
+  .t12-th span:not(:first-child) { text-align:right; }
+  .t12-row { display:grid; grid-template-columns:1fr 74px 76px 92px; align-items:center;
+    padding:15px 16px; border-bottom:1px solid #EEF0F3; }
+  .t12-sym { display:flex; align-items:center; gap:10px; }
+  .t12-lg { width:32px; height:32px; border-radius:8px; object-fit:contain; background:#fff;
+    border:1px solid #E4E7EB; padding:3px; flex:none; }
+  .t12-av { width:32px; height:32px; border-radius:8px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:12.5px; font-weight:800; color:#fff; }
+  .t12-c { font-size:15px; font-weight:800; letter-spacing:-.2px; }
+  .t12-num { text-align:right; font-size:14px; font-variant-numeric:tabular-nums; color:#2C333D; }
+  .t12-pill { justify-self:end; min-width:86px; text-align:center; padding:7px 8px;
+    border-radius:6px; font-size:13.5px; font-weight:700; color:#fff;
+    font-variant-numeric:tabular-nums; }
+  .t12-ft { padding:14px 16px; background:#fff; margin:0 16px; border-radius:0 0 12px 12px;
+    display:flex; justify-content:space-between; align-items:center; border-top:1px solid #E4E7EB; }
+  .t12-fk { font-size:14px; color:#5A6371; }
+  .t12-fv { font-size:19px; font-weight:800; font-variant-numeric:tabular-nums;
+    color:{{trendColor}}; }
+  .t12-bar { padding:16px 0 10px; text-align:center; font-size:15px; font-weight:650; color:#3B4450; }
+  .t12-home { width:140px; height:5px; border-radius:3px; background:#15181D; opacity:.8;
+    margin:0 auto 8px; }
+</style>
+
+<div class="t12">
+  <div class="t12-sb"><span>{{time}}</span><span class="t12-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#15181D"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#15181D"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#15181D"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#15181D" stroke-opacity=".4"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t12-nav">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#15181D" stroke-width="2.1"><path d="M15 5l-7 7 7 7"/></svg>
+    <div class="t12-nt">{{brand}}</div>
+    <div class="t12-ni">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg>
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/></svg>
+    </div>
+  </div>
+
+  <div class="t12-tabs">
+    <div class="t12-tb on">Hisse</div>
+    <div class="t12-tb">VİOP</div>
+  </div>
+
+  <div class="t12-sel">
+    <span>{{#hasAccountNo}}{{accountNo}}{{/hasAccountNo}}{{^hasAccountNo}}Standart{{/hasAccountNo}}</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6371" stroke-width="2.2"><path d="M5 9l7 7 7-7"/></svg>
+  </div>
+
+  <div class="t12-panel">
+    <div class="t12-th"><span>Sembol</span><span>Adet</span><span>Fiyat</span><span>Top. K/Z</span></div>
+    {{#rows}}
+    <div class="t12-row">
+      <div class="t12-sym">
+        {{#hasLogo}}<img class="t12-lg" src="{{{logo}}}" alt="">{{/hasLogo}}
+        {{^hasLogo}}<div class="t12-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+        <div class="t12-c">{{code}}</div>
+      </div>
+      <div class="t12-num">{{lot}}</div>
+      <div class="t12-num">{{price}}</div>
+      <div class="t12-pill" style="background:{{trendColor}}">{{pnlSigned}}</div>
+    </div>
+    {{/rows}}
+  </div>
+
+  <div class="t12-ft">
+    <span class="t12-fk">Toplam K/Z</span>
+    <span class="t12-fv">{{pnlSigned}} ({{pnlPercent}})</span>
+  </div>
+
+  <div class="t12-bar">Hesap Özeti</div>
+  <div class="t12-home"></div>
+</div>

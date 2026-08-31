@@ -1,0 +1,99 @@
+<style>
+  .t20 { width:1100px; box-sizing:border-box; overflow:hidden; background:#0B0D11; color:#C9D1DB;
+    font-family:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace; border:1px solid #1B2029; }
+  .t20 * { box-sizing:border-box; }
+  .t20-bar { height:42px; background:#12151B; border-bottom:1px solid #1B2029; display:flex;
+    align-items:center; padding:0 16px; gap:8px; }
+  .t20-dot { width:11px; height:11px; border-radius:50%; }
+  .t20-title { margin-left:12px; font-size:12.5px; color:#6B7480; }
+  .t20-live { margin-left:auto; font-size:11.5px; color:{{trendColorDark}}; letter-spacing:1px; }
+  .t20-hd { padding:22px 28px 18px; display:flex; align-items:flex-start;
+    justify-content:space-between; border-bottom:1px solid #171B23; }
+  .t20-t { font-size:22px; font-weight:700; color:#EBF0F6; letter-spacing:.5px; }
+  .t20-s { font-size:12px; color:#5B6472; margin-top:6px; }
+  .t20-tot { text-align:right; }
+  .t20-tk { font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:#5B6472; }
+  .t20-tv { font-size:30px; font-weight:700; letter-spacing:-.5px; margin-top:5px;
+    color:{{trendColorDark}}; font-variant-numeric:tabular-nums; }
+  .t20-kpis { display:flex; border-bottom:1px solid #171B23; }
+  .t20-kpi { flex:1; padding:16px 28px; border-right:1px solid #171B23; }
+  .t20-kpi:last-child { border-right:0; }
+  .t20-kk { font-size:11px; color:#5B6472; }
+  .t20-kv { font-size:18px; margin-top:6px; color:#E3E9F0; font-variant-numeric:tabular-nums; }
+  .t20-tbl { width:100%; border-collapse:collapse; }
+  .t20-tbl th { font-size:10.5px; letter-spacing:1.4px; text-transform:uppercase; color:#5B6472;
+    text-align:right; padding:12px 14px; font-weight:500; border-bottom:1px solid #1B2029; }
+  .t20-tbl th:first-child { text-align:left; padding-left:28px; }
+  .t20-tbl th:last-child { padding-right:28px; }
+  .t20-tbl td { padding:13px 14px; font-size:13.5px; text-align:right;
+    border-bottom:1px solid #14181F; font-variant-numeric:tabular-nums; }
+  .t20-tbl td:first-child { text-align:left; padding-left:28px; }
+  .t20-tbl td:last-child { padding-right:28px; }
+  .t20-sym { display:flex; align-items:center; gap:11px; }
+  .t20-img { width:30px; height:30px; border-radius:7px; object-fit:contain; background:#fff;
+    padding:3px; flex:none; }
+  .t20-av { width:30px; height:30px; border-radius:7px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; }
+  .t20-c { font-size:14px; font-weight:700; color:#EBF0F6; letter-spacing:.5px; }
+  .t20-ft { height:38px; background:#12151B; border-top:1px solid #1B2029; display:flex;
+    align-items:center; justify-content:space-between; padding:0 28px; font-size:11px; color:#4E5763; }
+</style>
+
+<div class="t20">
+  <div class="t20-bar">
+    <div class="t20-dot" style="background:#FF5F57"></div>
+    <div class="t20-dot" style="background:#FEBC2E"></div>
+    <div class="t20-dot" style="background:#28C840"></div>
+    <div class="t20-title">{{brand}} — portfoy</div>
+    <div class="t20-live">● {{rowCount}} POZISYON</div>
+  </div>
+
+  <div class="t20-hd">
+    <div>
+      <div class="t20-t">{{brand}}</div>
+      <div class="t20-s">$ portfolio --show{{#hasAccountNo}} --account {{accountNo}}{{/hasAccountNo}} · {{datetime}}</div>
+    </div>
+    <div class="t20-tot">
+      <div class="t20-tk">Toplam Kar / Zarar</div>
+      <div class="t20-tv">{{pnl}}</div>
+      <div style="font-size:14px;color:{{trendColorDark}};margin-top:3px">{{pnlPercent}}</div>
+    </div>
+  </div>
+
+  <div class="t20-kpis">
+    <div class="t20-kpi"><div class="t20-kk">maliyet</div><div class="t20-kv">{{investmentNum}}</div></div>
+    <div class="t20-kpi"><div class="t20-kk">guncel deger</div><div class="t20-kv">{{valueNum}}</div></div>
+    <div class="t20-kpi"><div class="t20-kk">nakit</div><div class="t20-kv">{{cashNum}}</div></div>
+    <div class="t20-kpi"><div class="t20-kk">toplam varlik</div><div class="t20-kv">{{totalAssetsNum}}</div></div>
+  </div>
+
+  <table class="t20-tbl">
+    <thead>
+      <tr><th>sembol</th><th>adet</th><th>maliyet</th><th>guncel</th>
+        <th>tutar</th><th>deger</th><th>pay</th><th>k/z</th><th>%</th></tr>
+    </thead>
+    <tbody>
+      {{#rows}}
+      <tr>
+        <td>
+          <div class="t20-sym">
+            {{#hasLogo}}<img class="t20-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+            {{^hasLogo}}<div class="t20-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+            <span class="t20-c">{{code}}</span>
+          </div>
+        </td>
+        <td>{{lot}}</td>
+        <td>{{cost}}</td>
+        <td>{{price}}</td>
+        <td>{{investmentNum}}</td>
+        <td>{{valueNum}}</td>
+        <td>{{share}}%</td>
+        <td style="color:{{trendColorDark}}">{{pnlSigned}}</td>
+        <td style="color:{{trendColorDark}}">{{pnlPercent}}</td>
+      </tr>
+      {{/rows}}
+    </tbody>
+  </table>
+
+  <div class="t20-ft"><span>{{txId}}</span><span>{{datetime}}</span></div>
+</div>

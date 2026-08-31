@@ -1,0 +1,93 @@
+<style>
+  .t13 { width:1000px; box-sizing:border-box; overflow:hidden; background:#fff; color:#12161C;
+    font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    border:1px solid #E3E7EC; }
+  .t13 * { box-sizing:border-box; }
+  .t13-hd { padding:26px 32px; border-bottom:1px solid #E3E7EC; display:flex;
+    align-items:flex-start; justify-content:space-between; }
+  .t13-t { font-size:24px; font-weight:750; letter-spacing:-.4px; }
+  .t13-s { font-size:13px; color:#7A828E; margin-top:5px; }
+  .t13-tot { text-align:right; }
+  .t13-tk { font-size:11.5px; letter-spacing:1.6px; text-transform:uppercase; color:#7A828E; }
+  .t13-tv { font-size:32px; font-weight:750; letter-spacing:-1px; margin-top:5px;
+    color:{{trendColor}}; font-variant-numeric:tabular-nums; }
+  .t13-tp { font-size:14px; font-weight:700; color:{{trendColor}}; margin-top:3px; }
+  .t13-kpis { display:flex; border-bottom:1px solid #E3E7EC; }
+  .t13-kpi { flex:1; padding:18px 32px; border-right:1px solid #EEF1F4; }
+  .t13-kpi:last-child { border-right:0; }
+  .t13-kk { font-size:12px; color:#7A828E; }
+  .t13-kv { font-size:20px; font-weight:700; margin-top:6px; font-variant-numeric:tabular-nums; }
+  .t13-tbl { width:100%; border-collapse:collapse; }
+  .t13-tbl th { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:#7A828E;
+    text-align:right; padding:14px 16px; font-weight:600; border-bottom:1px solid #E3E7EC;
+    background:#FAFBFC; }
+  .t13-tbl th:first-child { text-align:left; padding-left:32px; }
+  .t13-tbl th:last-child { padding-right:32px; }
+  .t13-tbl td { padding:15px 16px; font-size:14.5px; text-align:right;
+    border-bottom:1px solid #F1F3F6; font-variant-numeric:tabular-nums; }
+  .t13-tbl td:first-child { text-align:left; padding-left:32px; }
+  .t13-tbl td:last-child { padding-right:32px; }
+  .t13-sym { display:flex; align-items:center; gap:12px; }
+  .t13-lg { width:36px; height:36px; border-radius:9px; object-fit:contain; background:#fff;
+    border:1px solid #E9EDF1; padding:3px; flex:none; }
+  .t13-av { width:36px; height:36px; border-radius:9px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; }
+  .t13-c { font-size:15px; font-weight:700; }
+  .t13-n { font-size:11.5px; color:#7A828E; margin-top:1px; }
+  .t13-pill { display:inline-block; min-width:82px; text-align:center; padding:6px 10px;
+    border-radius:7px; font-size:13px; font-weight:700; }
+  .t13-ft { padding:16px 32px; display:flex; justify-content:space-between;
+    font-size:11.5px; color:#98A0AB; border-top:1px solid #E3E7EC; }
+</style>
+
+<div class="t13">
+  <div class="t13-hd">
+    <div>
+      <div class="t13-t">{{brand}}</div>
+      <div class="t13-s">{{#hasSubtitle}}{{subtitle}} · {{/hasSubtitle}}{{datetime}}{{#hasAccountNo}} · Hesap {{accountNo}}{{/hasAccountNo}}</div>
+    </div>
+    <div class="t13-tot">
+      <div class="t13-tk">Toplam Kâr / Zarar</div>
+      <div class="t13-tv">{{pnl}}</div>
+      <div class="t13-tp">{{trendArrow}} {{pnlPercent}}</div>
+    </div>
+  </div>
+
+  <div class="t13-kpis">
+    <div class="t13-kpi"><div class="t13-kk">Maliyet tutarı</div><div class="t13-kv">{{investment}}</div></div>
+    <div class="t13-kpi"><div class="t13-kk">Güncel değer</div><div class="t13-kv">{{value}}</div></div>
+    <div class="t13-kpi"><div class="t13-kk">Kullanılabilir bakiye</div><div class="t13-kv">{{cash}}</div></div>
+    <div class="t13-kpi"><div class="t13-kk">Pozisyon</div><div class="t13-kv">{{rowCount}}</div></div>
+  </div>
+
+  <table class="t13-tbl">
+    <thead>
+      <tr>
+        <th>Sembol</th><th>Adet</th><th>Ort. maliyet</th><th>Güncel</th>
+        <th>Maliyet tutarı</th><th>Güncel değer</th><th>Pay</th><th>Kâr / Zarar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#rows}}
+      <tr>
+        <td>
+          <div class="t13-sym">
+            {{#hasLogo}}<img class="t13-lg" src="{{{logo}}}" alt="">{{/hasLogo}}
+            {{^hasLogo}}<div class="t13-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+            <div><div class="t13-c">{{code}}</div><div class="t13-n">{{shortName}}</div></div>
+          </div>
+        </td>
+        <td>{{lot}}</td>
+        <td>{{cost}}</td>
+        <td>{{price}}</td>
+        <td>{{investmentNum}}</td>
+        <td>{{valueNum}}</td>
+        <td>%{{share}}</td>
+        <td><span class="t13-pill" style="color:#fff;background:{{trendColor}}">{{pnlSigned}}</span></td>
+      </tr>
+      {{/rows}}
+    </tbody>
+  </table>
+
+  <div class="t13-ft"><span>{{txId}}</span><span>{{date}}</span></div>
+</div>

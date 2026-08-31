@@ -1,0 +1,198 @@
+# Kâr Görseli Üretici
+
+Hisse + lot + maliyet parametrelerinden **25 hazır şablonla** portföy/pozisyon görselleri üretir
+ve tarayıcıdan PNG/JPEG olarak indirir. Sunucu tarafı yoktur — görseller tarayıcıda
+`html-to-image` ile oluşturulur.
+
+```bash
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # out/ klasörüne statik site
+npm run sync     # public/templates/ klasörünü tarayıp manifest.json'ı günceller
+```
+
+`next.config.ts` içinde `output: "export"` açık; `npm run build` sonrası `out/` klasörünü
+herhangi bir statik hostinge (Vercel, Netlify, nginx, IIS) atabilirsiniz.
+
+---
+
+## Akış
+
+1. **Hisseler** — kod, ad, güncel fiyat ve (opsiyonel) o hisseye özel base maliyet girilir.
+   - **Logolar otomatik gelir.** Kod yazıldığı anda Matriks logo servisinden çekilip data URI
+     olarak saklanır; ayrıca butona basmak gerekmez. "Logoları çek / temizle" butonları
+     yeniden denemek veya kaldırmak için vardır.
+   - Fiyatlar elle girilebilir ya da "Fiyatları API'den çek" ile
+     `{base}/api/sorgu/bist/{KOD}` uç noktasından alınabilir.
+   - Hisseye özel maliyet boş bırakılırsa genel base maliyet kullanılır. Fiyat seviyeleri
+     çok farklı hisselerde (örn. 172 TL ve 298 TL) tek bir base maliyet anlamsız sonuç
+     ürettiği için bu alan eklendi.
+2. **Varyasyonlar** — base lot / lot adım ve base maliyet / maliyet adım.
+   - **Eşleşmeli**: lot ve maliyet birlikte ilerler. `100/150 → 150/152,5 → 200/155 …`
+   - **Çapraz**: tüm lot × maliyet kombinasyonları.
+   - Maliyet adımı tutar (`₺`) veya yüzde (`%`) olabilir.
+3. **Şablon** — 25 tasarımdan biri seçilir, önizleme anında güncellenir.
+4. **İndirme** — kart başına *İndir* / *Kopyala*, ya da üst bardan *Seçilenleri indir*
+   (birden fazlaysa ZIP). Çözünürlük 1x / 2x / 3x.
+
+Ayarlar `localStorage`'a yazılır. **Eski bir ayar kaydı yeni varsayılanları gölgeleyebilir**;
+beklenmedik bir durumda tarayıcı konsolundan `localStorage.removeItem('kg-config-v1')`
+çalıştırıp sayfayı yenileyin.
+
+### Kaç görsel üretilir?
+
+| Şablon tipi | Üretilen görsel |
+|---|---|
+| `single` | Her pozisyon için bir görsel (hisse × varyasyon adımı) |
+| `list` | **Her varyasyon adımı için bir portföy ekranı**, içinde o adımdaki tüm hisseler |
+
+Yani 2 hisse × 4 adım → `single` şablonda 8 görsel, `list` şablonda 4 portföy ekranı
+(her birinde 2 satır).
+
+---
+
+## Şablonlar
+
+Hepsi gerçek uygulama arayüzü diliyle yazıldı: telefon iskeleti (durum çubuğu, başlık barı,
+alt sekme çubuğu), bilgi yoğun satırlar, ölçülü renk (yeşil/kırmızı yalnızca K/Z'de),
+sistem tipografisi ve hizalı rakamlar. Hiçbiri gerçek bir kurumun markasını taşımaz —
+başlık `{{brand}}` alanından gelir.
+
+| # | Ad | Tip | Boyut |
+|---|---|---|---|
+| 01 | Koyu · Yatırım Hesabı | list | 430×932 |
+| 02 | Koyu · Pozisyon Detayı | single | 430×932 |
+| 03 | Koyu · Portföy Tablosu | list | 430×932 |
+| 04 | Koyu · Pozisyon Kartı | single | 760×420 |
+| 05 | Açık · Mavi Hero | list | 430×932 |
+| 06 | Açık · Pozisyon Detayı | single | 430×932 |
+| 07 | Açık · Pozisyon Kartı | single | 760×420 |
+| 08–10 | Bant · Yeşil / Lacivert / Bordo | list | 430×932 |
+| 11 | Bant · Geniş Özet | list | 780×340 |
+| 12 | Tablo · Renkli Rozet | list | 430×932 |
+| 13 | Masaüstü · Geniş Tablo | list | 1000×auto |
+| 14 | Donut · Pozisyon Blokları | list | 430×auto |
+| 15 | Donut · Yatay Özet | list | 820×480 |
+| 16 | Dağılım · Çubuk | list | 430×932 |
+| 17 | Pozisyon Özeti | single | 430×932 |
+| 18 | Şerit · Tek Satır | single | 780×230 |
+| 19 | Hesap Özeti | list | 430×932 |
+| 20 | Masaüstü · Terminal | list | 1100×auto |
+| 21–22 | Kare · Koyu / Açık | single | 1080×1080 |
+| 23 | Özet Kart | list | 900×auto |
+| 24 | Koyu · Donut | list | 430×932 |
+| 25 | Açık · Portföy Listesi | list | 430×932 |
+
+---
+
+## Logo servisi
+
+`lib/logos.ts` — [Matriks Analist logo API'si](https://analistdocs.matriksdata.com/meta-veriler/logolar):
+
+```
+GET https://apitest.matriksdata.com/dumrul/v2/mtx-cdn/images/{type}/{name}?png=true&size=200
+     type: symbols | foreign-symbols | flags | sectors
+```
+
+Kimlik doğrulama gerektirmiyor ve CORS başlığı döndüğü için tarayıcıdan doğrudan çekilebiliyor.
+Logo indirilip **data URI**'ye çevrilerek saklanır; böylece PNG'ye dönüştürme sırasında ağa
+çıkılmaz — export hem hızlı hem de çevrimdışı çalışır. Base URL `MATRIKS_BASE` sabitinden
+değiştirilebilir.
+
+---
+
+## Kendi tasarımını eklemek
+
+1. `public/templates/` altına bir `.html` dosyası koy.
+2. `npm run sync` çalıştır — `manifest.json`'a eklenir, boyut ve tip otomatik tahmin edilir
+   (`{{#rows}}` içeren dosyalar `list` sayılır).
+3. `manifest.json` içinden `name`, `width`, `height`, `description` alanlarını düzenle.
+   `height` yerine `"auto"` yazarsan yükseklik içeriğe göre hesaplanır.
+
+### Kurallar
+
+- Dosya **kendi `<style>` bloğunu içeren tek parça HTML** olmalı; `<html>`/`<body>` yazma.
+- Kök elemana **sabit `width`** ver, manifest'teki değerle aynı olsun.
+- **Sınıf adlarını ön ekle** (`.t26-…`). Şablonlar izole iframe'de render edilir.
+- **Dış kaynak kullanma** — sistem font yığını kullan, görselleri data URI olarak göm.
+- **Sayı biçimi tuzağı:** `{{share}}` gibi görüntü token'ları Türkçe ondalık ayracı içerir
+  (`36,6`). CSS genişliği veya SVG koordinatı olarak kullanma — `width:36,6%` geçersizdir.
+  Bunun için nokta ondalıklı `{{shareCss}}` ve `{{donutDash}}` / `{{donutOffset}}` var.
+- Açıklama yazarken `{{ }}` kullanma (yorumlar temizlenir ama yine de kaçın).
+
+### Token'lar
+
+`{{token}}` HTML-escape edilir, `{{{token}}}` ham basılır.
+
+**Kimlik / başlık**
+`brand` `subtitle` `accountNo` `date` `time` `datetime` `txId` `step` `index`
+
+**Enstrüman**
+`code` `name` `shortName` `initial` `logo` `rowColor` `price` `priceMoney`
+
+**Pozisyon**
+`lot` `lotRaw` `cost` `costMoney` `investment` `investmentNum` `investmentCompact`
+`value` `valueNum` `valueCompact` `valueInt` `valueDec` `cash` `cashNum`
+
+**Kâr / zarar**
+`pnl` (işaretli + para birimi) `pnlSigned` (işaretli, birimsiz) `pnlNum` `pnlAbs` `pnlCompact`
+`pnlInt` `pnlDec` `pnlPercent` `pnlPercentNum` `dailyPnl` `dailyPercent` `dailyColor`
+
+**Görünüm**
+`trend` `trendTr` `trendSign` `trendArrow` `trendColor` `trendColorDark` `trendColorSoft`
+`trendBorder` `currency` `symbol` `sparkPath` `sparkArea`
+
+**Dağılım** — `share` (görüntü, virgüllü) `sharePercent` `shareCss` (CSS için, noktalı)
+`donutDash` `donutOffset` `rowIndex`
+
+**Liste (`kind: "list"`) toplamları** — blok dışında `pnl` `value` `investment` `pnlPercent`
+toplam verir; ayrıca `rowCount` `totalAssets` `totalAssetsInt` `totalAssetsDec`
+`topCode` `topShare`
+
+**Koşullu bloklar**
+```html
+{{#profit}}…kârda gösterilir…{{/profit}}
+{{^profit}}…kârda GİZLENİR…{{/profit}}
+{{#hasLogo}}<img src="{{{logo}}}">{{/hasLogo}}
+{{^hasLogo}}<div>{{initial}}</div>{{/hasLogo}}
+{{#rows}}<tr><td>{{code}}</td><td>{{pnl}}</td></tr>{{/rows}}
+```
+Bayraklar: `profit` `loss` `hasLogo` `hasSubtitle` `hasAccountNo` `hasCash`
+`hasPriceChange` `multiRow`
+
+**Donut çizmek** — `pathLength="100"` sayesinde dash değerleri doğrudan yüzdedir:
+```html
+{{#rows}}
+<circle cx="60" cy="60" r="45" fill="none" stroke="{{rowColor}}" stroke-width="16"
+  pathLength="100" stroke-dasharray="{{donutDash}}" stroke-dashoffset="{{donutOffset}}"
+  transform="rotate(-90 60 60)"/>
+{{/rows}}
+```
+
+---
+
+## Görsellerdeki veri hakkında
+
+Tüm rakamlar girilen adet, maliyet ve güncel fiyattan hesaplanır — uydurma veri üretilmez.
+`sparkPath` grafiği de rastgele değil, maliyetten güncel fiyata giden deterministik bir
+eğridir; fiyatın gerçek geçmişi değil, giriş → güncel hareketinin şematik gösterimidir.
+
+---
+
+## Dosya düzeni
+
+```
+app/                  arayüz (tek sayfa)
+components/           InputPanel, PreviewCard
+lib/
+  types.ts            veri modeli
+  variants.ts         lot/maliyet varyasyonu + adıma göre gruplama
+  template.ts         {{token}} motoru + token seti
+  format.ts           tr-TR sayı/para/tarih biçimleme
+  export.ts           html-to-image + JSZip
+  stage.ts            iframe render + görsele çevirme
+  quotes.ts           BIST fiyat API istemcisi
+  logos.ts            Matriks logo servisi
+public/templates/     25 şablon + manifest.json
+scripts/sync-templates.mjs
+```

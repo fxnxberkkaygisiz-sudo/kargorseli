@@ -1,0 +1,56 @@
+<style>
+  .t07 { width:760px; height:420px; box-sizing:border-box; overflow:hidden; background:#fff;
+    color:#0F1623; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; border:1px solid #E6E9EF; }
+  .t07 * { box-sizing:border-box; }
+  .t07-l { flex:1.15; padding:32px 34px; display:flex; flex-direction:column; }
+  .t07-r { flex:1; padding:32px 34px; background:#F8F9FB; border-left:1px solid #E6E9EF;
+    display:flex; flex-direction:column; justify-content:center; }
+  .t07-top { display:flex; align-items:center; gap:14px; }
+  .t07-av { width:52px; height:52px; border-radius:14px; display:flex; align-items:center;
+    justify-content:center; font-size:21px; font-weight:800; color:#fff; }
+  .t07-c { font-size:26px; font-weight:750; letter-spacing:-.4px; }
+  .t07-n { font-size:13px; color:#8A92A1; margin-top:2px; }
+  .t07-rows { margin-top:22px; }
+  .t07-row { display:flex; justify-content:space-between; padding:10px 0;
+    border-bottom:1px solid #EFF1F5; }
+  .t07-row:last-child { border-bottom:0; }
+  .t07-k { font-size:13.5px; color:#6B7383; }
+  .t07-v { font-size:14.5px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t07-ft { margin-top:auto; font-size:11px; color:#A0A7B4; letter-spacing:.3px; }
+  .t07-lbl { font-size:11.5px; letter-spacing:2.4px; text-transform:uppercase; color:#8A92A1; }
+  .t07-pnl { font-size:44px; font-weight:750; letter-spacing:-1.8px; margin-top:12px;
+    color:{{trendColor}}; font-variant-numeric:tabular-nums; }
+  .t07-pct { display:inline-flex; align-items:center; gap:7px; margin-top:14px; font-size:15px;
+    font-weight:700; color:#fff; background:{{trendColor}}; padding:7px 14px; border-radius:9px; }
+  .t07-sp { margin-top:22px; }
+</style>
+
+<div class="t07">
+  <div class="t07-l">
+    <div class="t07-top">
+      {{#hasLogo}}<img class="t07-av" style="object-fit:contain;background:#fff;padding:3px" src="{{{logo}}}" alt="">{{/hasLogo}}{{^hasLogo}}<div class="t07-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+      <div><div class="t07-c">{{code}}</div><div class="t07-n">{{shortName}}</div></div>
+    </div>
+    <div class="t07-rows">
+      <div class="t07-row"><span class="t07-k">Adet</span><span class="t07-v">{{lot}}</span></div>
+      <div class="t07-row"><span class="t07-k">Ortalama maliyet</span><span class="t07-v">{{symbol}}{{cost}}</span></div>
+      <div class="t07-row"><span class="t07-k">Güncel fiyat</span><span class="t07-v">{{symbol}}{{price}}</span></div>
+      <div class="t07-row"><span class="t07-k">Maliyet tutarı</span><span class="t07-v">{{symbol}}{{investmentNum}}</span></div>
+      <div class="t07-row"><span class="t07-k">Güncel değer</span><span class="t07-v">{{symbol}}{{valueNum}}</span></div>
+    </div>
+    <div class="t07-ft">{{datetime}} · {{txId}}</div>
+  </div>
+
+  <div class="t07-r">
+    <div class="t07-lbl">Kâr / Zarar</div>
+    <div class="t07-pnl">{{pnl}}</div>
+    <div><span class="t07-pct">{{trendArrow}} {{pnlPercent}}</span></div>
+    <div class="t07-sp">
+      <svg viewBox="0 0 200 60" width="100%" height="80" preserveAspectRatio="none">
+        <path d="{{sparkPath}}" fill="none" stroke="{{trendColor}}" stroke-width="1.6"
+          stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+    </div>
+  </div>
+</div>

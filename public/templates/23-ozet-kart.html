@@ -1,0 +1,104 @@
+<style>
+  .t23 { width:900px; box-sizing:border-box; overflow:hidden; background:#F5F6F8; padding:34px;
+    color:#12161C; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif; }
+  .t23 * { box-sizing:border-box; }
+  .t23-card { background:#fff; border-radius:20px; border:1px solid #E4E8ED; overflow:hidden;
+    box-shadow:0 10px 40px rgba(18,22,28,.06); }
+  .t23-hd { padding:28px 32px; display:flex; align-items:flex-start; justify-content:space-between;
+    border-bottom:1px solid #EDF0F4; }
+  .t23-t { font-size:22px; font-weight:750; letter-spacing:-.3px; }
+  .t23-s { font-size:12.5px; color:#8A92A1; margin-top:5px; }
+  .t23-tk { font-size:10.5px; letter-spacing:1.8px; text-transform:uppercase; color:#8A92A1;
+    text-align:right; }
+  .t23-tv { font-size:30px; font-weight:750; letter-spacing:-1px; margin-top:5px;
+    color:{{trendColor}}; font-variant-numeric:tabular-nums; text-align:right; }
+  .t23-tp { font-size:13.5px; font-weight:700; color:{{trendColor}}; text-align:right; margin-top:3px; }
+  .t23-bar { display:flex; height:8px; margin:0 32px; margin-top:22px; gap:3px; }
+  .t23-bs { height:100%; border-radius:3px; }
+  .t23-leg { display:flex; flex-wrap:wrap; gap:8px 18px; padding:14px 32px 0; }
+  .t23-lg { display:flex; align-items:center; gap:7px; font-size:12px; color:#5C6472; }
+  .t23-ld { width:9px; height:9px; border-radius:2px; }
+  .t23-kp { display:flex; gap:14px; padding:22px 32px 0; }
+  .t23-k { flex:1; background:#F8F9FB; border:1px solid #EDF0F4; border-radius:13px; padding:15px 17px; }
+  .t23-kk { font-size:11.5px; color:#8A92A1; }
+  .t23-kv { font-size:18px; font-weight:700; margin-top:6px; font-variant-numeric:tabular-nums; }
+  .t23-tbl { width:100%; border-collapse:collapse; margin-top:24px; }
+  .t23-tbl th { font-size:10.5px; letter-spacing:1.2px; text-transform:uppercase; color:#8A92A1;
+    text-align:right; padding:12px 14px; font-weight:600; border-bottom:1px solid #EDF0F4;
+    border-top:1px solid #EDF0F4; background:#FAFBFC; }
+  .t23-tbl th:first-child { text-align:left; padding-left:32px; }
+  .t23-tbl th:last-child { padding-right:32px; }
+  .t23-tbl td { padding:14px; font-size:14px; text-align:right; border-bottom:1px solid #F3F5F8;
+    font-variant-numeric:tabular-nums; }
+  .t23-tbl td:first-child { text-align:left; padding-left:32px; }
+  .t23-tbl td:last-child { padding-right:32px; }
+  .t23-sym { display:flex; align-items:center; gap:11px; }
+  .t23-img { width:34px; height:34px; border-radius:9px; object-fit:contain; background:#fff;
+    border:1px solid #EDF0F4; padding:3px; flex:none; }
+  .t23-av { width:34px; height:34px; border-radius:9px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; }
+  .t23-c { font-size:14.5px; font-weight:700; }
+  .t23-n { font-size:11px; color:#8A92A1; margin-top:1px; }
+  .t23-pill { display:inline-block; min-width:84px; text-align:center; padding:6px 10px;
+    border-radius:7px; font-size:13px; font-weight:700; }
+  .t23-ft { padding:18px 32px; display:flex; justify-content:space-between;
+    font-size:11.5px; color:#A3AAB6; }
+</style>
+
+<div class="t23">
+  <div class="t23-card">
+    <div class="t23-hd">
+      <div>
+        <div class="t23-t">{{brand}}</div>
+        <div class="t23-s">{{#hasSubtitle}}{{subtitle}} · {{/hasSubtitle}}{{datetime}}{{#hasAccountNo}} · {{accountNo}}{{/hasAccountNo}}</div>
+      </div>
+      <div>
+        <div class="t23-tk">Toplam Kâr / Zarar</div>
+        <div class="t23-tv">{{pnl}}</div>
+        <div class="t23-tp">{{trendArrow}} {{pnlPercent}}</div>
+      </div>
+    </div>
+
+    <div class="t23-bar">
+      {{#rows}}<div class="t23-bs" style="background:{{rowColor}};width:{{shareCss}}%"></div>{{/rows}}
+    </div>
+    <div class="t23-leg">
+      {{#rows}}<div class="t23-lg"><span class="t23-ld" style="background:{{rowColor}}"></span>{{code}} %{{share}}</div>{{/rows}}
+    </div>
+
+    <div class="t23-kp">
+      <div class="t23-k"><div class="t23-kk">Maliyet tutarı</div><div class="t23-kv">{{investment}}</div></div>
+      <div class="t23-k"><div class="t23-kk">Güncel değer</div><div class="t23-kv">{{value}}</div></div>
+      <div class="t23-k"><div class="t23-kk">Toplam varlık</div><div class="t23-kv">{{totalAssets}}</div></div>
+      <div class="t23-k"><div class="t23-kk">Pozisyon</div><div class="t23-kv">{{rowCount}}</div></div>
+    </div>
+
+    <table class="t23-tbl">
+      <thead>
+        <tr><th>Sembol</th><th>Adet</th><th>Ort. maliyet</th><th>Güncel</th>
+          <th>Maliyet tutarı</th><th>Güncel değer</th><th>Kâr / Zarar</th></tr>
+      </thead>
+      <tbody>
+        {{#rows}}
+        <tr>
+          <td>
+            <div class="t23-sym">
+              {{#hasLogo}}<img class="t23-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+              {{^hasLogo}}<div class="t23-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+              <div><div class="t23-c">{{code}}</div><div class="t23-n">{{shortName}}</div></div>
+            </div>
+          </td>
+          <td>{{lot}}</td>
+          <td>{{cost}}</td>
+          <td>{{price}}</td>
+          <td>{{investmentNum}}</td>
+          <td>{{valueNum}}</td>
+          <td><span class="t23-pill" style="color:{{trendColor}};background:{{trendColorSoft}}">{{pnlSigned}}</span></td>
+        </tr>
+        {{/rows}}
+      </tbody>
+    </table>
+
+    <div class="t23-ft"><span>{{txId}}</span><span>{{date}}</span></div>
+  </div>
+</div>

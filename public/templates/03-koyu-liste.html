@@ -1,0 +1,72 @@
+<style>
+  .t03 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#0A0B0D;
+    color:#E9ECF1; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t03 * { box-sizing:border-box; }
+  .t03-sb { height:50px; padding:0 24px 0 30px; display:flex; align-items:center;
+    justify-content:space-between; font-size:15px; font-weight:600; color:#fff; }
+  .t03-sbr { display:flex; align-items:center; gap:6px; }
+  .t03-nav { height:54px; padding:0 18px; display:flex; align-items:center;
+    justify-content:space-between; border-bottom:1px solid #16181D; }
+  .t03-nt { font-size:18px; font-weight:700; }
+  .t03-kpi { display:flex; padding:18px 10px; background:#14161B; margin:16px 18px 0;
+    border-radius:14px; }
+  .t03-k { flex:1; text-align:center; }
+  .t03-kk { font-size:11.5px; color:#7E8590; letter-spacing:.2px; }
+  .t03-kv { font-size:17px; font-weight:700; margin-top:6px; font-variant-numeric:tabular-nums; }
+  .t03-th { display:grid; grid-template-columns:1fr 62px 76px 100px; padding:22px 18px 9px;
+    font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:#6D7480; }
+  .t03-th span:not(:first-child) { text-align:right; }
+  .t03-row { display:grid; grid-template-columns:1fr 62px 76px 100px; align-items:center;
+    padding:14px 18px; border-top:1px solid #15171C; }
+  .t03-sym { display:flex; align-items:center; gap:11px; }
+  .t03-av { width:32px; height:32px; border-radius:9px; flex:none; display:flex;
+    align-items:center; justify-content:center; font-size:12.5px; font-weight:800; color:#fff; }
+  .t03-c { font-size:14.5px; font-weight:650; }
+  .t03-n { font-size:10.5px; color:#7E8590; margin-top:1px; }
+  .t03-num { text-align:right; font-size:14px; font-variant-numeric:tabular-nums; color:#C6CBD3; }
+  .t03-pill { justify-self:end; padding:6px 10px; border-radius:8px; font-size:13px;
+    font-weight:700; font-variant-numeric:tabular-nums; }
+  .t03-ft { margin-top:auto; padding:16px 18px; border-top:1px solid #16181D;
+    display:flex; justify-content:space-between; font-size:11.5px; color:#6D7480; }
+  .t03-home { width:140px; height:5px; border-radius:3px; background:#3A3E46; margin:0 auto 10px; }
+</style>
+
+<div class="t03">
+  <div class="t03-sb"><span>{{time}}</span><span class="t03-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#fff"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#fff" stroke-opacity=".45"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t03-nav">
+    <div style="display:flex;align-items:center;gap:14px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E9ECF1" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+      <div class="t03-nt">{{brand}}</div>
+    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7E8590" stroke-width="1.9"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg>
+  </div>
+
+  <div class="t03-kpi">
+    <div class="t03-k"><div class="t03-kk">Maliyet</div><div class="t03-kv">{{investmentCompact}}</div></div>
+    <div class="t03-k"><div class="t03-kk">Güncel değer</div><div class="t03-kv">{{valueCompact}}</div></div>
+    <div class="t03-k"><div class="t03-kk">Kâr / Zarar</div><div class="t03-kv" style="color:{{trendColorDark}}">{{pnlPercent}}</div></div>
+  </div>
+
+  <div class="t03-th"><span>Sembol</span><span>Adet</span><span>Maliyet</span><span>K/Z</span></div>
+
+  {{#rows}}
+  <div class="t03-row">
+    <div class="t03-sym">
+      {{#hasLogo}}<img class="t03-av" style="object-fit:contain;background:#fff;padding:3px" src="{{{logo}}}" alt="">{{/hasLogo}}{{^hasLogo}}<div class="t03-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+      <div><div class="t03-c">{{code}}</div><div class="t03-n">{{symbol}}{{price}}</div></div>
+    </div>
+    <div class="t03-num">{{lot}}</div>
+    <div class="t03-num">{{cost}}</div>
+    <div class="t03-pill" style="color:{{trendColorDark}};background:{{trendColorSoft}}">{{pnlSigned}}</div>
+  </div>
+  {{/rows}}
+
+  <div class="t03-ft"><span>{{datetime}}</span><span>{{rowCount}} pozisyon</span></div>
+  <div class="t03-home"></div>
+</div>

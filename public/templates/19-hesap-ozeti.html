@@ -1,0 +1,91 @@
+<style>
+  .t19 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#F4F5F7;
+    color:#14181F; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t19 * { box-sizing:border-box; }
+  .t19-sb { height:50px; padding:0 24px 0 30px; display:flex; align-items:center;
+    justify-content:space-between; font-size:15px; font-weight:600; }
+  .t19-sbr { display:flex; align-items:center; gap:6px; }
+  .t19-nav { height:56px; padding:0 18px; background:#fff; display:flex; align-items:center;
+    justify-content:space-between; border-bottom:1px solid #E7EAEF; }
+  .t19-nt { font-size:18px; font-weight:750; }
+  .t19-hero { background:#fff; padding:22px; text-align:center; border-bottom:1px solid #E7EAEF; }
+  .t19-hk { font-size:12.5px; color:#8A92A1; }
+  .t19-hv { font-size:34px; font-weight:750; letter-spacing:-1.2px; margin-top:6px;
+    font-variant-numeric:tabular-nums; }
+  .t19-hc { font-size:14px; font-weight:650; margin-top:6px; color:{{trendColor}}; }
+  .t19-sec { padding:20px 20px 8px; font-size:11.5px; letter-spacing:1.3px;
+    text-transform:uppercase; color:#8A92A1; }
+  .t19-card { background:#fff; border-top:1px solid #E7EAEF; border-bottom:1px solid #E7EAEF;
+    padding:0 20px; }
+  .t19-r { display:flex; justify-content:space-between; align-items:center; padding:14px 0;
+    border-bottom:1px solid #F1F3F6; }
+  .t19-r:last-child { border-bottom:0; }
+  .t19-k { font-size:14px; color:#5C6472; }
+  .t19-v { font-size:14.5px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t19-pr { display:flex; align-items:center; padding:13px 0; border-bottom:1px solid #F1F3F6; }
+  .t19-pr:last-child { border-bottom:0; }
+  .t19-img { width:34px; height:34px; border-radius:9px; object-fit:contain; background:#fff;
+    border:1px solid #E7EAEF; padding:3px; margin-right:11px; flex:none; }
+  .t19-av { width:34px; height:34px; border-radius:9px; margin-right:11px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; }
+  .t19-c { font-size:14.5px; font-weight:700; }
+  .t19-s { font-size:11.5px; color:#8A92A1; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t19-rv { margin-left:auto; text-align:right; }
+  .t19-a { font-size:14.5px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t19-p { font-size:12px; font-weight:650; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t19-ft { margin-top:auto; padding:16px 20px; display:flex; justify-content:space-between;
+    font-size:11px; color:#98A0AB; }
+  .t19-home { width:140px; height:5px; border-radius:3px; background:#14181F; opacity:.85;
+    margin:0 auto 8px; }
+</style>
+
+<div class="t19">
+  <div class="t19-sb"><span>{{time}}</span><span class="t19-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#14181F"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#14181F"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#14181F"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#14181F" stroke-opacity=".4"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t19-nav">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14181F" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+    <div class="t19-nt">Hesap Özeti</div>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8A92A1" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+  </div>
+
+  <div class="t19-hero">
+    <div class="t19-hk">Toplam Varlık{{#hasAccountNo}} · {{accountNo}}{{/hasAccountNo}}</div>
+    <div class="t19-hv">{{symbol}}{{totalAssetsNum}}</div>
+    <div class="t19-hc">{{pnl}} ({{pnlPercent}})</div>
+  </div>
+
+  <div class="t19-sec">Hesap Bilgileri</div>
+  <div class="t19-card">
+    <div class="t19-r"><span class="t19-k">Hisse varlığı</span><span class="t19-v">{{symbol}}{{valueNum}}</span></div>
+    <div class="t19-r"><span class="t19-k">Maliyet tutarı</span><span class="t19-v">{{symbol}}{{investmentNum}}</span></div>
+    <div class="t19-r"><span class="t19-k">Kullanılabilir bakiye</span><span class="t19-v">{{symbol}}{{cashNum}}</span></div>
+    <div class="t19-r"><span class="t19-k">Toplam kâr / zarar</span><span class="t19-v" style="color:{{trendColor}}">{{pnl}}</span></div>
+    <div class="t19-r"><span class="t19-k">Pozisyon sayısı</span><span class="t19-v">{{rowCount}}</span></div>
+  </div>
+
+  <div class="t19-sec">Pozisyonlar</div>
+  <div class="t19-card">
+    {{#rows}}
+    <div class="t19-pr">
+      {{#hasLogo}}<img class="t19-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+      {{^hasLogo}}<div class="t19-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+      <div>
+        <div class="t19-c">{{code}}</div>
+        <div class="t19-s">{{lot}} adet · ort. {{cost}} · %{{share}} pay</div>
+      </div>
+      <div class="t19-rv">
+        <div class="t19-a">{{symbol}}{{valueNum}}</div>
+        <div class="t19-p" style="color:{{trendColor}}">{{pnl}}</div>
+      </div>
+    </div>
+    {{/rows}}
+  </div>
+
+  <div class="t19-ft"><span>{{datetime}}</span><span>{{txId}}</span></div>
+  <div class="t19-home"></div>
+</div>

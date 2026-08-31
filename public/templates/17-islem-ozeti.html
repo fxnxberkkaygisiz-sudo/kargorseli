@@ -1,0 +1,93 @@
+<style>
+  .t17 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#F6F7F9;
+    color:#12161C; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t17 * { box-sizing:border-box; }
+  .t17-sb { height:50px; padding:0 24px 0 30px; display:flex; align-items:center;
+    justify-content:space-between; font-size:15px; font-weight:600; }
+  .t17-sbr { display:flex; align-items:center; gap:6px; }
+  .t17-nav { height:54px; padding:0 18px; display:flex; align-items:center; gap:14px;
+    background:#fff; border-bottom:1px solid #E9ECF1; }
+  .t17-nt { font-size:17px; font-weight:700; }
+  .t17-badge { margin:26px auto 0; width:76px; height:76px; border-radius:50%;
+    background:{{trendColorSoft}}; border:2px solid {{trendColor}};
+    display:flex; align-items:center; justify-content:center; }
+  .t17-ttl { text-align:center; font-size:19px; font-weight:750; margin-top:16px; }
+  .t17-sub { text-align:center; font-size:13px; color:#8A92A1; margin-top:5px; }
+  .t17-big { text-align:center; margin-top:22px; }
+  .t17-bk { font-size:11.5px; letter-spacing:1.8px; text-transform:uppercase; color:#8A92A1; }
+  .t17-bv { font-size:40px; font-weight:750; letter-spacing:-1.4px; margin-top:8px;
+    color:{{trendColor}}; font-variant-numeric:tabular-nums; }
+  .t17-bp { display:inline-block; margin-top:12px; font-size:14px; font-weight:700; color:#fff;
+    background:{{trendColor}}; padding:6px 16px; border-radius:999px; }
+  .t17-card { margin:26px 18px 0; background:#fff; border-radius:16px; padding:4px 18px;
+    border:1px solid #E9ECF1; }
+  .t17-r { display:flex; justify-content:space-between; align-items:center; padding:14px 0;
+    border-bottom:1px solid #F1F3F6; }
+  .t17-r:last-child { border-bottom:0; }
+  .t17-k { font-size:13.5px; color:#6B7482; }
+  .t17-v { font-size:14.5px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t17-sym { display:flex; align-items:center; gap:10px; }
+  .t17-img { width:28px; height:28px; border-radius:8px; object-fit:contain; background:#fff;
+    border:1px solid #E9ECF1; padding:2px; }
+  .t17-av { width:28px; height:28px; border-radius:8px; display:flex; align-items:center;
+    justify-content:center; font-size:11.5px; font-weight:800; color:#fff; }
+  .t17-note { margin:16px 18px 0; font-size:11.5px; color:#98A0AB; line-height:1.55; }
+  .t17-btn { margin:auto 18px 14px; height:52px; border-radius:14px; background:#12161C;
+    color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px;
+    font-weight:700; }
+  .t17-home { width:140px; height:5px; border-radius:3px; background:#12161C; opacity:.85;
+    margin:0 auto 8px; }
+</style>
+
+<div class="t17">
+  <div class="t17-sb"><span>{{time}}</span><span class="t17-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#12161C"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#12161C"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#12161C"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#12161C" stroke-opacity=".4"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t17-nav">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#12161C" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+    <div class="t17-nt">Pozisyon Özeti</div>
+  </div>
+
+  <div class="t17-badge">
+    {{#profit}}<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="{{trendColor}}" stroke-width="2.4"><path d="M12 19V6M6 12l6-6 6 6"/></svg>{{/profit}}
+    {{^profit}}<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="{{trendColor}}" stroke-width="2.4"><path d="M12 5v13M6 12l6 6 6-6"/></svg>{{/profit}}
+  </div>
+
+  <div class="t17-ttl">{{code}} pozisyonu</div>
+  <div class="t17-sub">{{shortName}}</div>
+
+  <div class="t17-big">
+    <div class="t17-bk">Kâr / Zarar</div>
+    <div class="t17-bv">{{pnl}}</div>
+    <div><span class="t17-bp">{{trendArrow}} {{pnlPercent}}</span></div>
+  </div>
+
+  <div class="t17-card">
+    <div class="t17-r">
+      <span class="t17-k">Enstrüman</span>
+      <span class="t17-sym">
+        {{#hasLogo}}<img class="t17-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+        {{^hasLogo}}<span class="t17-av" style="background:{{rowColor}}">{{initial}}</span>{{/hasLogo}}
+        <b>{{code}}</b>
+      </span>
+    </div>
+    <div class="t17-r"><span class="t17-k">Adet</span><span class="t17-v">{{lot}}</span></div>
+    <div class="t17-r"><span class="t17-k">Ortalama maliyet</span><span class="t17-v">{{symbol}}{{cost}}</span></div>
+    <div class="t17-r"><span class="t17-k">Güncel fiyat</span><span class="t17-v">{{symbol}}{{price}}</span></div>
+    <div class="t17-r"><span class="t17-k">Maliyet tutarı</span><span class="t17-v">{{symbol}}{{investmentNum}}</span></div>
+    <div class="t17-r"><span class="t17-k">Güncel değer</span><span class="t17-v">{{symbol}}{{valueNum}}</span></div>
+    <div class="t17-r"><span class="t17-k">İşlem no</span><span class="t17-v">{{txId}}</span></div>
+    <div class="t17-r"><span class="t17-k">Tarih</span><span class="t17-v">{{datetime}}</span></div>
+  </div>
+
+  <div class="t17-note">
+    Değerler {{datetime}} itibarıyla girilen adet ve maliyet üzerinden hesaplanmıştır.
+  </div>
+
+  <div class="t17-btn">Tamam</div>
+  <div class="t17-home"></div>
+</div>

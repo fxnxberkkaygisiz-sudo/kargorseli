@@ -1,0 +1,93 @@
+<style>
+  .t16 { width:430px; height:932px; box-sizing:border-box; overflow:hidden; background:#fff;
+    color:#12161C; font-family:-apple-system,"Segoe UI",Roboto,system-ui,sans-serif;
+    display:flex; flex-direction:column; }
+  .t16 * { box-sizing:border-box; }
+  .t16-sb { height:50px; padding:0 24px 0 30px; display:flex; align-items:center;
+    justify-content:space-between; font-size:15px; font-weight:600; }
+  .t16-sbr { display:flex; align-items:center; gap:6px; }
+  .t16-nav { height:54px; padding:0 20px; display:flex; align-items:center;
+    justify-content:space-between; border-bottom:1px solid #EDF0F4; }
+  .t16-nt { font-size:19px; font-weight:750; letter-spacing:-.3px; }
+  .t16-sum { padding:26px 22px 20px; }
+  .t16-sk { font-size:12.5px; color:#8A92A1; letter-spacing:.3px; }
+  .t16-sv { font-size:36px; font-weight:750; letter-spacing:-1.3px; margin-top:6px;
+    font-variant-numeric:tabular-nums; }
+  .t16-sc { font-size:14.5px; font-weight:650; margin-top:6px; color:{{trendColor}}; }
+  .t16-bar { display:flex; height:10px; border-radius:5px; overflow:hidden; margin:6px 22px 0;
+    gap:2px; }
+  .t16-bs { height:100%; border-radius:2px; }
+  .t16-leg { display:flex; flex-wrap:wrap; gap:8px 14px; padding:14px 22px 0; }
+  .t16-lg { display:flex; align-items:center; gap:6px; font-size:11.5px; color:#5C6472; }
+  .t16-ld { width:8px; height:8px; border-radius:2px; }
+  .t16-kp { display:flex; gap:10px; padding:20px 22px 0; }
+  .t16-k { flex:1; border:1px solid #EDF0F4; border-radius:12px; padding:13px 14px; }
+  .t16-kk { font-size:11px; color:#8A92A1; }
+  .t16-kv { font-size:15.5px; font-weight:700; margin-top:5px; font-variant-numeric:tabular-nums; }
+  .t16-h { padding:24px 22px 10px; font-size:12px; letter-spacing:1.2px; text-transform:uppercase;
+    color:#8A92A1; }
+  .t16-row { display:flex; align-items:center; padding:14px 22px; border-top:1px solid #F2F4F7; }
+  .t16-img { width:36px; height:36px; border-radius:10px; object-fit:contain; background:#fff;
+    border:1px solid #EDF0F4; padding:3px; margin-right:12px; flex:none; }
+  .t16-av { width:36px; height:36px; border-radius:10px; margin-right:12px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:#fff; }
+  .t16-c { font-size:15px; font-weight:700; }
+  .t16-n { font-size:11.5px; color:#8A92A1; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t16-v { margin-left:auto; text-align:right; }
+  .t16-a { font-size:15px; font-weight:650; font-variant-numeric:tabular-nums; }
+  .t16-p { font-size:12.5px; font-weight:650; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .t16-ft { margin-top:auto; padding:16px 22px; border-top:1px solid #EDF0F4;
+    display:flex; justify-content:space-between; font-size:11px; color:#A3AAB6; }
+  .t16-home { width:140px; height:5px; border-radius:3px; background:#12161C; opacity:.85;
+    margin:0 auto 8px; }
+</style>
+
+<div class="t16">
+  <div class="t16-sb"><span>{{time}}</span><span class="t16-sbr">
+    <svg width="17" height="11" viewBox="0 0 17 11" fill="#12161C"><rect y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.8" width="3" height="11" rx="1"/></svg>
+    <svg width="16" height="11" viewBox="0 0 16 11" fill="#12161C"><path d="M8 10.6 5.6 8.1a3.4 3.4 0 0 1 4.8 0zM3.1 5.7 1.1 3.7a9.8 9.8 0 0 1 13.8 0l-2 2a7 7 0 0 0-9.8 0z"/></svg>
+    <svg width="26" height="12" viewBox="0 0 26 12" fill="#12161C"><rect x=".5" y=".5" width="22" height="11" rx="3.2" fill="none" stroke="#12161C" stroke-opacity=".4"/><rect x="2.2" y="2.2" width="17" height="7.6" rx="1.6"/><path d="M24.2 4.2v3.6a2 2 0 0 0 0-3.6z" fill-opacity=".5"/></svg>
+  </span></div>
+
+  <div class="t16-nav">
+    <div class="t16-nt">{{brand}}</div>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8A92A1" stroke-width="1.9"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg>
+  </div>
+
+  <div class="t16-sum">
+    <div class="t16-sk">Güncel portföy değeri</div>
+    <div class="t16-sv">{{symbol}}{{valueNum}}</div>
+    <div class="t16-sc">{{pnl}} ({{pnlPercent}})</div>
+  </div>
+
+  <div class="t16-bar">
+    {{#rows}}<div class="t16-bs" style="background:{{rowColor}};width:{{shareCss}}%"></div>{{/rows}}
+  </div>
+  <div class="t16-leg">
+    {{#rows}}<div class="t16-lg"><span class="t16-ld" style="background:{{rowColor}}"></span>{{code}} %{{share}}</div>{{/rows}}
+  </div>
+
+  <div class="t16-kp">
+    <div class="t16-k"><div class="t16-kk">Maliyet tutarı</div><div class="t16-kv">{{investmentNum}}</div></div>
+    <div class="t16-k"><div class="t16-kk">Nakit</div><div class="t16-kv">{{cashNum}}</div></div>
+  </div>
+
+  <div class="t16-h">Pozisyonlar</div>
+  {{#rows}}
+  <div class="t16-row">
+    {{#hasLogo}}<img class="t16-img" src="{{{logo}}}" alt="">{{/hasLogo}}
+    {{^hasLogo}}<div class="t16-av" style="background:{{rowColor}}">{{initial}}</div>{{/hasLogo}}
+    <div>
+      <div class="t16-c">{{code}}</div>
+      <div class="t16-n">{{lot}} adet · ort. {{cost}}</div>
+    </div>
+    <div class="t16-v">
+      <div class="t16-a">{{symbol}}{{valueNum}}</div>
+      <div class="t16-p" style="color:{{trendColor}}">{{pnl}} ({{pnlPercent}})</div>
+    </div>
+  </div>
+  {{/rows}}
+
+  <div class="t16-ft"><span>{{datetime}}</span><span>{{txId}}</span></div>
+  <div class="t16-home"></div>
+</div>
